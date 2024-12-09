@@ -1,8 +1,8 @@
-import { useSession } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "@supabase/auth-helpers-react";
 import {
   Table,
   TableBody,
@@ -67,8 +67,22 @@ const Dashboard = () => {
     navigate("/login");
   };
 
+  if (!session) {
+    navigate("/login");
+    return null;
+  }
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -85,7 +99,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex gap-4">
-            <Button onClick={() => navigate("/apply")}>New Application</Button>
+            <Button onClick={() => navigate("/")}>New Application</Button>
             <Button variant="outline" onClick={handleSignOut}>
               Sign Out
             </Button>

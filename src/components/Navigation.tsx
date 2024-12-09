@@ -9,9 +9,14 @@ export const Navigation = () => {
     <nav className="border-b bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
-          <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-primary">
-              YES Finance
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/58b13019-da3c-47e4-8458-ebac6ebf7cee.png" 
+                alt="YES Finance Logo" 
+                className="h-10 w-auto"
+              />
+              <span className="text-2xl font-bold text-primary">YES Finance</span>
             </Link>
           </div>
           <div className="flex items-center gap-4">
