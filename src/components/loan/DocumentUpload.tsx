@@ -40,17 +40,10 @@ export const DocumentUpload = ({ applicationId, onUploadComplete }: DocumentUplo
   const handleUpload = async (file: File, documentType: DocumentType) => {
     setIsUploading(true);
     try {
+      // First insert the document metadata
       const fileExt = file.name.split(".").pop();
       const filePath = `${applicationId}/${crypto.randomUUID()}.${fileExt}`;
 
-      // Upload file to storage
-      const { error: uploadError } = await supabase.storage
-        .from("loan_documents")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Save document metadata
       const { error: dbError } = await supabase.from("loan_documents").insert({
         loan_application_id: applicationId,
         file_name: file.name,
@@ -60,6 +53,20 @@ export const DocumentUpload = ({ applicationId, onUploadComplete }: DocumentUplo
       });
 
       if (dbError) throw dbError;
+
+      // Then upload the file to storage
+      const { error: uploadError } = await supabase.storage
+        .from("loan_documents")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        // If upload fails, clean up the database entry
+        await supabase
+          .from("loan_documents")
+          .delete()
+          .eq("file_path", filePath);
+        throw uploadError;
+      }
 
       toast({
         title: "Success",
