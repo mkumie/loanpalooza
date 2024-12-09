@@ -38,22 +38,23 @@ const Register = () => {
   const onSubmit = async (data: RegisterForm) => {
     try {
       setIsLoading(true);
-      const { error: signUpError } = await supabase.auth.signUp({
+      
+      // First, sign up the user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          data: {
+            first_name: data.firstName,
+            surname: data.surname,
+          },
+        },
       });
 
       if (signUpError) throw signUpError;
 
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          first_name: data.firstName,
-          surname: data.surname,
-        })
-        .eq("id", (await supabase.auth.getUser()).data.user?.id);
-
-      if (updateError) throw updateError;
+      // The profile will be automatically created by the database trigger
+      // with the metadata we provided during signup
 
       toast({
         title: "Registration successful!",
@@ -62,6 +63,7 @@ const Register = () => {
       
       navigate("/login");
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
