@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { PersonalInfoSection } from "./application-details/PersonalInfoSection";
 import { LocationSection } from "./application-details/LocationSection";
 import { EmploymentSection } from "./application-details/EmploymentSection";
+import { DocumentsSection } from "./application-details/DocumentsSection";
 
 interface ApplicationRowProps {
   application: LoanApplication;
@@ -65,6 +66,7 @@ export const ApplicationRow = ({
                 <PersonalInfoSection application={application} />
                 <LocationSection application={application} />
                 <EmploymentSection application={application} />
+                <DocumentsSection applicationId={application.id} />
 
                 {isAdmin && (
                   <section>
