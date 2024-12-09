@@ -19,11 +19,11 @@ const Login = () => {
       navigate("/dashboard");
     }
 
-    // Listen for auth errors
+    // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "USER_DELETED") {
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
         setAuthError(null);
       }
     });
@@ -32,6 +32,25 @@ const Login = () => {
       subscription.unsubscribe();
     };
   }, [session, navigate]);
+
+  // Set up auth error listener
+  useEffect(() => {
+    const handleAuthError = (error: Error) => {
+      console.error('Auth error:', error);
+      if (error.message.includes('email_not_confirmed')) {
+        setAuthError('Please check your email and confirm your account before logging in.');
+      } else {
+        setAuthError(error.message);
+      }
+    };
+
+    // Subscribe to auth error events
+    const subscription = supabase.auth.onError(handleAuthError);
+
+    return () => {
+      subscription.data.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,14 +103,6 @@ const Login = () => {
               }}
               theme="default"
               providers={[]}
-              onError={(error) => {
-                console.error('Auth error:', error);
-                if (error.message.includes('email_not_confirmed')) {
-                  setAuthError('Please check your email and confirm your account before logging in.');
-                } else {
-                  setAuthError(error.message);
-                }
-              }}
             />
           </CardContent>
         </Card>
