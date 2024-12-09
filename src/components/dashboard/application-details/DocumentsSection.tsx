@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { FileText, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 
 interface DocumentsSectionProps {
@@ -12,6 +12,7 @@ interface DocumentsSectionProps {
 
 export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
   const [viewUrl, setViewUrl] = useState<string | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<{ name: string; type: string } | null>(null);
 
   const { data: documents, isLoading } = useQuery({
     queryKey: ["loanDocuments", applicationId],
@@ -26,7 +27,7 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
     },
   });
 
-  const handleView = async (filePath: string) => {
+  const handleView = async (filePath: string, fileName: string, fileType: string) => {
     try {
       const { data: { signedUrl }, error } = await supabase.storage
         .from("loan_documents")
@@ -34,6 +35,7 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
 
       if (error) throw error;
       setViewUrl(signedUrl);
+      setSelectedDoc({ name: fileName, type: fileType });
     } catch (error) {
       console.error("View error:", error);
     }
@@ -76,25 +78,29 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleView(doc.file_path)}
+                    onClick={() => handleView(doc.file_path, doc.file_name, doc.file_type)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     View
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh]">
-                  {viewUrl && (
-                    doc.file_type.startsWith('image/') ? (
+                  <DialogTitle>Document Preview</DialogTitle>
+                  <DialogDescription>
+                    Viewing: {selectedDoc?.name}
+                  </DialogDescription>
+                  {viewUrl && selectedDoc && (
+                    selectedDoc.type.startsWith('image/') ? (
                       <img 
                         src={viewUrl} 
-                        alt={doc.file_name}
+                        alt={selectedDoc.name}
                         className="w-full h-auto"
                       />
                     ) : (
                       <iframe
                         src={viewUrl}
                         className="w-full h-[80vh]"
-                        title={doc.file_name}
+                        title={selectedDoc.name}
                       />
                     )
                   )}
