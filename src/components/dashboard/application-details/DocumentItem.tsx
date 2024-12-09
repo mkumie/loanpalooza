@@ -1,5 +1,8 @@
-import { FileText } from "lucide-react";
-import { DocumentPreviewDialog } from "./DocumentPreviewDialog";
+import { Button } from "@/components/ui/button";
+import { Eye, FileIcon } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DocumentItemProps {
   fileName: string;
@@ -9,24 +12,55 @@ interface DocumentItemProps {
   viewUrl: string | null;
 }
 
-export const DocumentItem = ({ fileName, fileType, uploadedAt, onView, viewUrl }: DocumentItemProps) => {
+export const DocumentItem = ({
+  fileName,
+  fileType,
+  uploadedAt,
+  onView,
+  viewUrl,
+}: DocumentItemProps) => {
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-      <div className="flex items-center space-x-3">
-        <FileText className="h-5 w-5 text-gray-500" />
-        <div>
-          <p className="font-medium">{fileName}</p>
-          <p className="text-sm text-gray-500">
-            {new Date(uploadedAt).toLocaleDateString()}
-          </p>
+    <Card className="group hover:bg-muted/50 transition-colors">
+      <CardContent className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <FileIcon className="h-5 w-5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="font-medium truncate">{fileName}</p>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{fileName}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>{fileType.toUpperCase()}</span>
+              <span>•</span>
+              <span>{formatDistanceToNow(new Date(uploadedAt), { addSuffix: true })}</span>
+            </div>
+          </div>
         </div>
-      </div>
-      <DocumentPreviewDialog
-        fileName={fileName}
-        onView={onView}
-        viewUrl={viewUrl}
-        fileType={fileType}
-      />
-    </div>
+        
+        <div className="flex items-center gap-2">
+          {viewUrl ? (
+            <Button asChild variant="outline" size="sm">
+              <a href={viewUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                <Eye className="h-4 w-4 mr-2" />
+                View
+              </a>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" onClick={onView}>
+              <Eye className="h-4 w-4 mr-2" />
+              View
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
