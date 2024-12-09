@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { FileText, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
+import { DocumentItem } from "./DocumentItem";
 
 interface DocumentsSectionProps {
   applicationId: string;
@@ -31,7 +29,7 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
     try {
       const { data: { signedUrl }, error } = await supabase.storage
         .from("loan_documents")
-        .createSignedUrl(filePath, 60); // URL valid for 60 seconds
+        .createSignedUrl(filePath, 60);
 
       if (error) throw error;
       setViewUrl(signedUrl);
@@ -60,53 +58,14 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
       {documents && documents.length > 0 ? (
         <div className="space-y-2">
           {documents.map((doc) => (
-            <div
+            <DocumentItem
               key={doc.id}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-            >
-              <div className="flex items-center space-x-3">
-                <FileText className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="font-medium">{doc.file_name}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(doc.uploaded_at).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleView(doc.file_path, doc.file_name, doc.file_type)}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh]">
-                  <DialogTitle>Document Preview</DialogTitle>
-                  <DialogDescription>
-                    Viewing: {selectedDoc?.name}
-                  </DialogDescription>
-                  {viewUrl && selectedDoc && (
-                    selectedDoc.type.startsWith('image/') ? (
-                      <img 
-                        src={viewUrl} 
-                        alt={selectedDoc.name}
-                        className="w-full h-auto"
-                      />
-                    ) : (
-                      <iframe
-                        src={viewUrl}
-                        className="w-full h-[80vh]"
-                        title={selectedDoc.name}
-                      />
-                    )
-                  )}
-                </DialogContent>
-              </Dialog>
-            </div>
+              fileName={doc.file_name}
+              fileType={doc.file_type}
+              uploadedAt={doc.uploaded_at}
+              onView={() => handleView(doc.file_path, doc.file_name, doc.file_type)}
+              viewUrl={selectedDoc?.name === doc.file_name ? viewUrl : null}
+            />
           ))}
         </div>
       ) : (
