@@ -15,7 +15,7 @@ import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanAppl
 import { validateCurrentStep } from "@/utils/loanFormValidation";
 
 const LoanApplicationFormContent = () => {
-  const { formData, currentStep, setIsSubmitting } = useLoanApplication();
+  const { formData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
   const session = useSession();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -106,10 +106,10 @@ const LoanApplicationFormContent = () => {
 
       <div className="space-y-8">
         {currentStep === 1 && <PersonalDetailsSection />}
-        {currentStep === 2 && <EmploymentDetailsSection />}
-        {currentStep === 3 && <LoanDetailsSection />}
-        {currentStep === 4 && <ReferenceDetailsSection />}
-        {currentStep === 5 && <PaymentDetailsSection />}
+        {currentStep === 2 && <EmploymentDetailsSection formData={formData} setFormData={setFormData} />}
+        {currentStep === 3 && <LoanDetailsSection formData={formData} setFormData={setFormData} />}
+        {currentStep === 4 && <ReferenceDetailsSection formData={formData} setFormData={setFormData} />}
+        {currentStep === 5 && <PaymentDetailsSection formData={formData} setFormData={setFormData} />}
       </div>
 
       <FormNavigation />
