@@ -2,19 +2,35 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
   const session = useSession();
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     if (session) {
       navigate("/dashboard");
     }
+
+    // Listen for auth errors
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "USER_DELETED") {
+        setAuthError(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [session, navigate]);
 
   return (
@@ -31,6 +47,12 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {authError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{authError}</AlertDescription>
+              </Alert>
+            )}
             <Auth
               supabaseClient={supabase}
               appearance={{
@@ -57,10 +79,19 @@ const Login = () => {
                   container: 'w-full',
                   button: 'w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90',
                   input: 'w-full px-3 py-2 border rounded-md',
+                  message: 'text-red-500 text-sm',
                 },
               }}
               theme="default"
               providers={[]}
+              onError={(error) => {
+                console.error('Auth error:', error);
+                if (error.message.includes('email_not_confirmed')) {
+                  setAuthError('Please check your email and confirm your account before logging in.');
+                } else {
+                  setAuthError(error.message);
+                }
+              }}
             />
           </CardContent>
         </Card>
