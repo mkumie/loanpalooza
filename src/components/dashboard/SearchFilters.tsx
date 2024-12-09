@@ -15,15 +15,17 @@ export const SearchFilters = ({
   onStatusFilterChange,
 }: SearchFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row gap-4 mb-4">
-      <Input
-        placeholder="Search by purpose or amount..."
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-        className="max-w-xs"
-      />
+    <div className="flex gap-4 mb-4">
+      <div className="flex-1">
+        <Input
+          placeholder="Search by purpose or amount..."
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
       <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-        <SelectTrigger className="max-w-[200px]">
+        <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
         <SelectContent>
