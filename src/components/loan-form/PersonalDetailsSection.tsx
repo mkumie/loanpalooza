@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,25 +5,10 @@ import { useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useLoanApplication } from "@/contexts/LoanApplicationContext";
 
-interface PersonalDetailsSectionProps {
-  formData: {
-    firstName: string;
-    surname: string;
-    dateOfBirth: string;
-    gender: string;
-    maritalStatus: string;
-    district: string;
-    village: string;
-    homeProvince: string;
-  };
-  setFormData: (data: any) => void;
-}
-
-export const PersonalDetailsSection = ({
-  formData,
-  setFormData,
-}: PersonalDetailsSectionProps) => {
+export const PersonalDetailsSection = () => {
+  const { formData, setFormData } = useLoanApplication();
   const session = useSession();
   const { toast } = useToast();
 
@@ -47,65 +31,72 @@ export const PersonalDetailsSection = ({
         }
 
         if (profile) {
-          setFormData({
-            ...formData,
-            firstName: profile.first_name || formData.firstName,
-            surname: profile.surname || formData.surname,
-            dateOfBirth: profile.date_of_birth || formData.dateOfBirth,
-          });
+          setFormData(prev => ({
+            ...prev,
+            firstName: profile.first_name || prev.firstName,
+            surname: profile.surname || prev.surname,
+            dateOfBirth: profile.date_of_birth || prev.dateOfBirth,
+          }));
         }
       }
     };
 
     fetchProfileData();
-  }, [session]);
+  }, [session, setFormData, toast]);
 
   return (
     <Card>
       <CardHeader className="bg-primary text-white">
-        <CardTitle>Client's Personal Details</CardTitle>
+        <CardTitle>Personal Details</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+      <CardContent className="space-y-4 pt-6">
         <div className="space-y-2">
-          <Label htmlFor="firstName">First Name(s)</Label>
-          <Input
+          <Label htmlFor="firstName">First Name</Label>
+          <input
+            type="text"
             id="firstName"
             value={formData.firstName}
             onChange={(e) =>
               setFormData({ ...formData, firstName: e.target.value })
             }
-            readOnly={!!formData.firstName} // Make readonly if pre-filled from profile
+            readOnly={!!formData.firstName}
+            className="w-full p-2 border rounded"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="surname">Surname</Label>
-          <Input
+          <input
+            type="text"
             id="surname"
             value={formData.surname}
             onChange={(e) =>
               setFormData({ ...formData, surname: e.target.value })
             }
-            readOnly={!!formData.surname} // Make readonly if pre-filled from profile
+            readOnly={!!formData.surname}
+            className="w-full p-2 border rounded"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="dateOfBirth">Date of Birth</Label>
-          <Input
-            id="dateOfBirth"
+          <input
             type="date"
+            id="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={(e) =>
               setFormData({ ...formData, dateOfBirth: e.target.value })
             }
-            readOnly={!!formData.dateOfBirth} // Make readonly if pre-filled from profile
+            readOnly={!!formData.dateOfBirth}
+            className="w-full p-2 border rounded"
           />
         </div>
         <div className="space-y-2">
           <Label>Gender</Label>
           <RadioGroup
             value={formData.gender}
-            onValueChange={(value) => setFormData({ ...formData, gender: value })}
-            className="flex gap-4"
+            onValueChange={(value) =>
+              setFormData({ ...formData, gender: value })
+            }
+            className="flex space-x-4"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="male" id="male" />
@@ -118,52 +109,56 @@ export const PersonalDetailsSection = ({
           </RadioGroup>
         </div>
         <div className="space-y-2">
-          <Label>Marital Status</Label>
-          <RadioGroup
+          <Label htmlFor="maritalStatus">Marital Status</Label>
+          <select
+            id="maritalStatus"
             value={formData.maritalStatus}
-            onValueChange={(value) =>
-              setFormData({ ...formData, maritalStatus: value })
+            onChange={(e) =>
+              setFormData({ ...formData, maritalStatus: e.target.value })
             }
-            className="flex gap-4"
+            className="w-full p-2 border rounded"
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="single" id="single" />
-              <Label htmlFor="single">Single</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="married" id="married" />
-              <Label htmlFor="married">Married</Label>
-            </div>
-          </RadioGroup>
+            <option value="">Select...</option>
+            <option value="single">Single</option>
+            <option value="married">Married</option>
+            <option value="divorced">Divorced</option>
+            <option value="widowed">Widowed</option>
+          </select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="district">District</Label>
-          <Input
+          <input
+            type="text"
             id="district"
             value={formData.district}
             onChange={(e) =>
               setFormData({ ...formData, district: e.target.value })
             }
+            className="w-full p-2 border rounded"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="village">Village</Label>
-          <Input
+          <input
+            type="text"
             id="village"
             value={formData.village}
             onChange={(e) =>
               setFormData({ ...formData, village: e.target.value })
             }
+            className="w-full p-2 border rounded"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="homeProvince">Home Province</Label>
-          <Input
+          <input
+            type="text"
             id="homeProvince"
             value={formData.homeProvince}
             onChange={(e) =>
               setFormData({ ...formData, homeProvince: e.target.value })
             }
+            className="w-full p-2 border rounded"
           />
         </div>
       </CardContent>
