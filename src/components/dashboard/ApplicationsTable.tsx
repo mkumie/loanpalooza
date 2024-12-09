@@ -5,6 +5,7 @@ import { SearchFilters } from "./SearchFilters";
 import { Pagination } from "./Pagination";
 import { ApplicationRow } from "./ApplicationRow";
 import { Card } from "@/components/ui/card";
+import { FileX } from "lucide-react";
 
 interface ApplicationsTableProps {
   applications: LoanApplication[];
@@ -68,8 +69,12 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate }: Applicati
               {(!paginatedApplications || paginatedApplications.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center">
-                    <div className="text-muted-foreground">
-                      No applications found
+                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                      <FileX className="h-10 w-10 mb-2" />
+                      <p>No applications found</p>
+                      {searchTerm || statusFilter !== "all" ? (
+                        <p className="text-sm">Try adjusting your filters</p>
+                      ) : null}
                     </div>
                   </TableCell>
                 </TableRow>

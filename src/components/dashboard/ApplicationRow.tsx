@@ -1,12 +1,13 @@
 import { LoanApplication } from "@/types/loan";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Upload, Eye } from "lucide-react";
+import { Upload, Eye, Calendar, DollarSign, FileText } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DocumentUpload } from "@/components/loan/DocumentUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "./application-details/StatusBadge";
 import { ApplicationDetails } from "./application-details/ApplicationDetails";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ApplicationRowProps {
   application: LoanApplication;
@@ -24,13 +25,51 @@ export const ApplicationRow = ({
   onUpdate,
 }: ApplicationRowProps) => {
   return (
-    <TableRow key={application.id} className="group">
+    <TableRow key={application.id} className="group hover:bg-muted/50">
       <TableCell className="hidden sm:table-cell">
-        {new Date(application.created_at).toLocaleDateString()}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span>{new Date(application.created_at).toLocaleDateString()}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Application Date</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </TableCell>
-      <TableCell>${application.loan_amount.toLocaleString()}</TableCell>
-      <TableCell className="hidden md:table-cell max-w-[200px] truncate">
-        {application.loan_purpose}
+      <TableCell>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <span>${application.loan_amount.toLocaleString()}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Loan Amount</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableCell>
+      <TableCell className="hidden md:table-cell max-w-[200px]">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="truncate">{application.loan_purpose}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{application.loan_purpose}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </TableCell>
       <TableCell>
         <StatusBadge status={application.status} />
@@ -39,7 +78,7 @@ export const ApplicationRow = ({
         <div className="flex justify-end gap-2">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="hover:bg-primary/10">
                 <Eye className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Details</span>
               </Button>
@@ -62,6 +101,7 @@ export const ApplicationRow = ({
                 variant="outline"
                 size="sm"
                 onClick={() => onExpandRow(expandedRow === application.id ? null : application.id)}
+                className="hover:bg-primary/10"
               >
                 <Upload className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Documents</span>
