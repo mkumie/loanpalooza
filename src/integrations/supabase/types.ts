@@ -9,6 +9,120 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      loan_applications: {
+        Row: {
+          account_holder_name: string
+          account_number: string
+          account_type: string
+          bank_name: string
+          branch_name: string
+          created_at: string
+          date_of_birth: string
+          district: string
+          employer_name: string | null
+          employment_length: string | null
+          employment_status: string
+          existing_loan_details: string | null
+          existing_loans: boolean
+          first_name: string
+          gender: string
+          home_province: string
+          id: string
+          loan_amount: number
+          loan_purpose: string
+          marital_status: string
+          monthly_income: number
+          occupation: string | null
+          reference_address: string
+          reference_full_name: string
+          reference_occupation: string
+          reference_phone: string
+          reference_relationship: string
+          repayment_period: number
+          status: string
+          surname: string
+          updated_at: string
+          user_id: string | null
+          village: string
+          work_address: string | null
+          work_phone: string | null
+        }
+        Insert: {
+          account_holder_name: string
+          account_number: string
+          account_type: string
+          bank_name: string
+          branch_name: string
+          created_at?: string
+          date_of_birth: string
+          district: string
+          employer_name?: string | null
+          employment_length?: string | null
+          employment_status: string
+          existing_loan_details?: string | null
+          existing_loans?: boolean
+          first_name: string
+          gender: string
+          home_province: string
+          id?: string
+          loan_amount: number
+          loan_purpose: string
+          marital_status: string
+          monthly_income: number
+          occupation?: string | null
+          reference_address: string
+          reference_full_name: string
+          reference_occupation: string
+          reference_phone: string
+          reference_relationship: string
+          repayment_period: number
+          status?: string
+          surname: string
+          updated_at?: string
+          user_id?: string | null
+          village: string
+          work_address?: string | null
+          work_phone?: string | null
+        }
+        Update: {
+          account_holder_name?: string
+          account_number?: string
+          account_type?: string
+          bank_name?: string
+          branch_name?: string
+          created_at?: string
+          date_of_birth?: string
+          district?: string
+          employer_name?: string | null
+          employment_length?: string | null
+          employment_status?: string
+          existing_loan_details?: string | null
+          existing_loans?: boolean
+          first_name?: string
+          gender?: string
+          home_province?: string
+          id?: string
+          loan_amount?: number
+          loan_purpose?: string
+          marital_status?: string
+          monthly_income?: number
+          occupation?: string | null
+          reference_address?: string
+          reference_full_name?: string
+          reference_occupation?: string
+          reference_phone?: string
+          reference_relationship?: string
+          repayment_period?: number
+          status?: string
+          surname?: string
+          updated_at?: string
+          user_id?: string | null
+          village?: string
+          work_address?: string | null
+          work_phone?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
