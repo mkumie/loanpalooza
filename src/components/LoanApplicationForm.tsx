@@ -11,6 +11,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Navigation } from "./Navigation";
 import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanApplicationContext";
 import { validateCurrentStep } from "@/utils/loanFormValidation";
 
@@ -100,20 +101,23 @@ const LoanApplicationFormContent = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-6 mt-16 space-y-8">
-      <FormHeader logoUrl="/lovable-uploads/58b13019-da3c-47e4-8458-ebac6ebf7cee.png" />
-      <ProgressStepper />
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      <form onSubmit={handleSubmit} className="container mx-auto px-4 py-8 mt-16 max-w-5xl space-y-8">
+        <FormHeader logoUrl="/lovable-uploads/58b13019-da3c-47e4-8458-ebac6ebf7cee.png" />
+        <ProgressStepper />
 
-      <div className="space-y-8">
-        {currentStep === 1 && <PersonalDetailsSection />}
-        {currentStep === 2 && <EmploymentDetailsSection formData={formData} setFormData={setFormData} />}
-        {currentStep === 3 && <LoanDetailsSection formData={formData} setFormData={setFormData} />}
-        {currentStep === 4 && <ReferenceDetailsSection formData={formData} setFormData={setFormData} />}
-        {currentStep === 5 && <PaymentDetailsSection formData={formData} setFormData={setFormData} />}
-      </div>
+        <div className="space-y-8">
+          {currentStep === 1 && <PersonalDetailsSection />}
+          {currentStep === 2 && <EmploymentDetailsSection formData={formData} setFormData={setFormData} />}
+          {currentStep === 3 && <LoanDetailsSection formData={formData} setFormData={setFormData} />}
+          {currentStep === 4 && <ReferenceDetailsSection formData={formData} setFormData={setFormData} />}
+          {currentStep === 5 && <PaymentDetailsSection formData={formData} setFormData={setFormData} />}
+        </div>
 
-      <FormNavigation />
-    </form>
+        <FormNavigation />
+      </form>
+    </div>
   );
 };
 
