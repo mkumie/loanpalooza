@@ -11,6 +11,13 @@ import {
 import { LoanStatus } from "@/types/loan";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface StatusUpdateControlsProps {
   applicationId: string;
@@ -25,49 +32,57 @@ export const StatusUpdateControls = ({
   currentComments,
   onUpdate,
 }: StatusUpdateControlsProps) => {
-  const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
-  const [adminComments, setAdminComments] = useState(currentComments || "");
+  const [status, setStatus] = useState<LoanStatus>(currentStatus);
+  const [comments, setComments] = useState(currentComments || "");
+  const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  const handleStatusChange = async (newStatus: LoanStatus) => {
-    const { error } = await supabase
-      .from("loan_applications")
-      .update({ 
-        status: newStatus,
-        admin_comments: adminComments,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", applicationId);
+  const handleStatusUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from("loan_applications")
+        .update({ 
+          status,
+          admin_comments: comments,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", applicationId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Status Updated",
+        description: "The application status has been updated successfully.",
+      });
+      
+      onUpdate();
+    } catch (error) {
+      console.error("Error updating status:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update application status",
+        description: "Failed to update application status. Please try again.",
       });
-      return;
+    } finally {
+      setIsUpdating(false);
     }
-
-    toast({
-      title: "Success",
-      description: "Application status updated successfully",
-    });
-    
-    setSelectedApplication(null);
-    setAdminComments("");
-    onUpdate();
   };
 
   return (
-    <div className="space-y-2">
-      {selectedApplication === applicationId ? (
+    <Card>
+      <CardHeader>
+        <CardTitle>Update Application Status</CardTitle>
+        <CardDescription>
+          Change the status and add any relevant comments for this application.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Select
-            onValueChange={(value) => handleStatusChange(value as LoanStatus)}
-            defaultValue={currentStatus}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Status" />
+          <label className="text-sm font-medium">Status</label>
+          <Select value={status} onValueChange={(value) => setStatus(value as LoanStatus)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="pending">Pending</SelectItem>
@@ -75,35 +90,26 @@ export const StatusUpdateControls = ({
               <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
-          <Textarea
-            placeholder="Add comments..."
-            value={adminComments}
-            onChange={(e) => setAdminComments(e.target.value)}
-            className="w-full"
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSelectedApplication(null);
-              setAdminComments("");
-            }}
-          >
-            Cancel
-          </Button>
         </div>
-      ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setSelectedApplication(applicationId);
-            setAdminComments(currentComments || "");
-          }}
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Comments</label>
+          <Textarea
+            placeholder="Add any comments or notes about this decision..."
+            value={comments}
+            onChange={(e) => setComments(e.target.value)}
+            className="min-h-[100px]"
+          />
+        </div>
+
+        <Button 
+          onClick={handleStatusUpdate}
+          disabled={isUpdating}
+          className="w-full"
         >
-          Update Status
+          {isUpdating ? "Updating..." : "Update Status"}
         </Button>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
