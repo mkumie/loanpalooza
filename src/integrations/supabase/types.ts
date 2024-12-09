@@ -14,6 +14,7 @@ export type Database = {
           account_holder_name: string
           account_number: string
           account_type: string
+          admin_comments: string | null
           bank_name: string
           branch_name: string
           created_at: string
@@ -39,7 +40,7 @@ export type Database = {
           reference_phone: string
           reference_relationship: string
           repayment_period: number
-          status: string
+          status: Database["public"]["Enums"]["loan_status"]
           surname: string
           updated_at: string
           user_id: string | null
@@ -51,6 +52,7 @@ export type Database = {
           account_holder_name: string
           account_number: string
           account_type: string
+          admin_comments?: string | null
           bank_name: string
           branch_name: string
           created_at?: string
@@ -76,7 +78,7 @@ export type Database = {
           reference_phone: string
           reference_relationship: string
           repayment_period: number
-          status?: string
+          status?: Database["public"]["Enums"]["loan_status"]
           surname: string
           updated_at?: string
           user_id?: string | null
@@ -88,6 +90,7 @@ export type Database = {
           account_holder_name?: string
           account_number?: string
           account_type?: string
+          admin_comments?: string | null
           bank_name?: string
           branch_name?: string
           created_at?: string
@@ -113,7 +116,7 @@ export type Database = {
           reference_phone?: string
           reference_relationship?: string
           repayment_period?: number
-          status?: string
+          status?: Database["public"]["Enums"]["loan_status"]
           surname?: string
           updated_at?: string
           user_id?: string | null
@@ -167,7 +170,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      loan_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never

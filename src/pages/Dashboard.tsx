@@ -13,11 +13,22 @@ import {
 } from "@/components/ui/table";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 const Dashboard = () => {
   const session = useSession();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
+  const [adminComments, setAdminComments] = useState("");
 
   // Fetch user profile to check if admin
   const { data: profile } = useQuery({
@@ -42,7 +53,7 @@ const Dashboard = () => {
   });
 
   // Fetch loan applications
-  const { data: applications, isLoading } = useQuery({
+  const { data: applications, isLoading, refetch } = useQuery({
     queryKey: ["applications"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -61,6 +72,35 @@ const Dashboard = () => {
       return data;
     },
   });
+
+  const handleStatusChange = async (applicationId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from("loan_applications")
+      .update({ 
+        status: newStatus,
+        admin_comments: adminComments,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", applicationId);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update application status",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Application status updated successfully",
+    });
+    
+    setSelectedApplication(null);
+    setAdminComments("");
+    refetch();
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -114,6 +154,7 @@ const Dashboard = () => {
                 <TableHead>Amount</TableHead>
                 <TableHead>Purpose</TableHead>
                 <TableHead>Status</TableHead>
+                {profile?.is_admin && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -136,12 +177,64 @@ const Dashboard = () => {
                     >
                       {app.status}
                     </span>
+                    {app.admin_comments && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {app.admin_comments}
+                      </p>
+                    )}
                   </TableCell>
+                  {profile?.is_admin && (
+                    <TableCell>
+                      {selectedApplication === app.id ? (
+                        <div className="space-y-2">
+                          <Select
+                            onValueChange={(value) => handleStatusChange(app.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Textarea
+                            placeholder="Add comments..."
+                            value={adminComments}
+                            onChange={(e) => setAdminComments(e.target.value)}
+                            className="w-full"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedApplication(null);
+                              setAdminComments("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedApplication(app.id);
+                            setAdminComments(app.admin_comments || "");
+                          }}
+                        >
+                          Update Status
+                        </Button>
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
               {applications?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
+                  <TableCell colSpan={profile?.is_admin ? 5 : 4} className="text-center py-8">
                     No applications found
                   </TableCell>
                 </TableRow>
