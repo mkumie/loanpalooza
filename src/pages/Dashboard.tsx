@@ -8,6 +8,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ApplicationsTable } from "@/components/dashboard/ApplicationsTable";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { DashboardChart } from "@/components/dashboard/DashboardChart";
+import { ApplicationProgress } from "@/components/dashboard/ApplicationProgress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -76,6 +77,8 @@ const Dashboard = () => {
     );
   }
 
+  const latestApplication = applications?.[0];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -93,9 +96,18 @@ const Dashboard = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              {latestApplication && (
+                <ApplicationProgress
+                  status={latestApplication.status}
+                  createdAt={latestApplication.created_at}
+                  updatedAt={latestApplication.updated_at}
+                />
+              )}
               <DashboardStats />
-              <DashboardChart />
+              <div className="md:col-span-2">
+                <DashboardChart />
+              </div>
             </div>
           </TabsContent>
           
