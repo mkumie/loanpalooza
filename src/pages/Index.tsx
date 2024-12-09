@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Calculator } from "lucide-react";
+import { Calculator, GraduationCap, Wallet, RefreshCw } from "lucide-react";
 import { DocumentChecklist } from "@/components/DocumentChecklist";
 
 const Index = () => {
@@ -43,26 +43,41 @@ const Index = () => {
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl font-bold text-primary">
-            Fast & Easy Personal Loans
+            Trusted Financial Solutions in PNG
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Get the financial support you need with YES Finance. We offer competitive rates, 
-            flexible repayment terms, and a simple online application process.
+            YES Finance provides accessible loan solutions to Papua New Guinea residents. 
+            We offer competitive rates, flexible repayment terms, and a simple online application process.
           </p>
           
-          <div className="grid gap-4 md:grid-cols-3 max-w-3xl mx-auto py-8">
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2">Quick Process</h3>
-              <p className="text-gray-600">Apply online and get a decision within 24 hours</p>
-            </div>
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2">Flexible Terms</h3>
-              <p className="text-gray-600">Choose repayment terms that work for you</p>
-            </div>
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2">Competitive Rates</h3>
-              <p className="text-gray-600">Get access to affordable interest rates</p>
-            </div>
+          <div className="grid gap-6 md:grid-cols-3 max-w-3xl mx-auto py-8">
+            <Card className="p-6">
+              <div className="flex flex-col items-center space-y-3">
+                <Wallet className="h-10 w-10 text-primary" />
+                <h3 className="text-lg font-semibold">Personal Loans</h3>
+                <p className="text-gray-600 text-sm">
+                  Quick access to funds for your personal needs with flexible repayment options
+                </p>
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="flex flex-col items-center space-y-3">
+                <GraduationCap className="h-10 w-10 text-primary" />
+                <h3 className="text-lg font-semibold">School Fee Loans</h3>
+                <p className="text-gray-600 text-sm">
+                  Invest in education with our dedicated school fee financing solutions
+                </p>
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="flex flex-col items-center space-y-3">
+                <RefreshCw className="h-10 w-10 text-primary" />
+                <h3 className="text-lg font-semibold">Refinancing</h3>
+                <p className="text-gray-600 text-sm">
+                  Consolidate your existing loans with better terms and lower rates
+                </p>
+              </div>
+            </Card>
           </div>
 
           {/* Loan Calculator Section */}
@@ -73,7 +88,7 @@ const Index = () => {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="loanAmount">Loan Amount ($)</Label>
+                <Label htmlFor="loanAmount">Loan Amount (PGK)</Label>
                 <Input
                   id="loanAmount"
                   type="number"
@@ -103,7 +118,7 @@ const Index = () => {
                 <div className="mt-4 p-4 bg-primary/10 rounded-lg">
                   <p className="text-sm text-gray-600">Estimated Monthly Payment</p>
                   <p className="text-2xl font-bold text-primary">
-                    ${monthlyPayment.toFixed(2)}
+                    PGK {monthlyPayment.toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
                     *Based on 15% annual interest rate
@@ -121,7 +136,7 @@ const Index = () => {
 
           <div className="space-y-4">
             <Button size="lg" onClick={handleGetStarted} className="text-lg px-8">
-              Get Started Now
+              Apply Now
             </Button>
             <p className="text-sm text-gray-500">
               Already have an account? <a href="/login" className="text-primary hover:underline">Sign in</a>
