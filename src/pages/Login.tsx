@@ -19,12 +19,24 @@ const Login = () => {
       navigate("/dashboard");
     }
 
-    // Listen for auth state changes
+    // Listen for auth state changes and handle errors
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setAuthError(null);
+      }
+      
+      // Check for auth errors in the session
+      if (!session && event === 'SIGNED_IN') {
+        const error = new URLSearchParams(window.location.search).get('error_description');
+        if (error) {
+          if (error.includes('email_not_confirmed')) {
+            setAuthError('Please check your email and confirm your account before logging in.');
+          } else {
+            setAuthError(error);
+          }
+        }
       }
     });
 
@@ -32,25 +44,6 @@ const Login = () => {
       subscription.unsubscribe();
     };
   }, [session, navigate]);
-
-  // Set up auth error listener
-  useEffect(() => {
-    const handleAuthError = (error: Error) => {
-      console.error('Auth error:', error);
-      if (error.message.includes('email_not_confirmed')) {
-        setAuthError('Please check your email and confirm your account before logging in.');
-      } else {
-        setAuthError(error.message);
-      }
-    };
-
-    // Subscribe to auth error events
-    const subscription = supabase.auth.onError(handleAuthError);
-
-    return () => {
-      subscription.data.subscription.unsubscribe();
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
