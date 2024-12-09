@@ -1,14 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
+import { FileText, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface DocumentsSectionProps {
   applicationId: string;
 }
 
 export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
+  const [viewUrl, setViewUrl] = useState<string | null>(null);
+
   const { data: documents, isLoading } = useQuery({
     queryKey: ["loanDocuments", applicationId],
     queryFn: async () => {
@@ -22,25 +26,16 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
     },
   });
 
-  const handleDownload = async (filePath: string, fileName: string) => {
+  const handleView = async (filePath: string) => {
     try {
-      const { data, error } = await supabase.storage
+      const { data: { signedUrl }, error } = await supabase.storage
         .from("loan_documents")
-        .download(filePath);
+        .createSignedUrl(filePath, 60); // URL valid for 60 seconds
 
       if (error) throw error;
-
-      // Create a download link and trigger it
-      const url = URL.createObjectURL(data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      setViewUrl(signedUrl);
     } catch (error) {
-      console.error("Download error:", error);
+      console.error("View error:", error);
     }
   };
 
@@ -76,14 +71,35 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
                   </p>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDownload(doc.file_path, doc.file_name)}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleView(doc.file_path)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh]">
+                  {viewUrl && (
+                    doc.file_type.startsWith('image/') ? (
+                      <img 
+                        src={viewUrl} 
+                        alt={doc.file_name}
+                        className="w-full h-auto"
+                      />
+                    ) : (
+                      <iframe
+                        src={viewUrl}
+                        className="w-full h-[80vh]"
+                        title={doc.file_name}
+                      />
+                    )
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
           ))}
         </div>
