@@ -8,6 +8,9 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ApplicationsTable } from "@/components/dashboard/ApplicationsTable";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { DashboardChart } from "@/components/dashboard/DashboardChart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
   const session = useSession();
@@ -67,13 +70,8 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 mt-16">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -81,21 +79,36 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="container mx-auto px-4 py-8 mt-16">
+      <div className="container mx-auto px-4 py-8 mt-16 space-y-8">
         <DashboardHeader
           userEmail={session.user.email}
           isAdmin={profile?.is_admin}
           onSignOut={handleSignOut}
         />
-        <DashboardStats />
-        <DashboardChart />
-        <div className="mt-8 bg-white rounded-lg shadow">
-          <ApplicationsTable
-            applications={applications || []}
-            isAdmin={profile?.is_admin}
-            onUpdate={refetch}
-          />
-        </div>
+        
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="applications">Applications</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid gap-6">
+              <DashboardStats />
+              <DashboardChart />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="applications">
+            <Card className="p-6">
+              <ApplicationsTable
+                applications={applications || []}
+                isAdmin={profile?.is_admin}
+                onUpdate={refetch}
+              />
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
