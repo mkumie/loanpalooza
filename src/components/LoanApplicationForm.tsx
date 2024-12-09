@@ -8,6 +8,7 @@ import { useState } from "react";
 
 export const LoanApplicationForm = () => {
   const [formData, setFormData] = useState({
+    // Personal Details
     firstName: "",
     surname: "",
     dateOfBirth: "",
@@ -16,7 +17,20 @@ export const LoanApplicationForm = () => {
     district: "",
     village: "",
     homeProvince: "",
-    // Add more fields as needed
+    // Employment Details
+    employmentStatus: "",
+    employerName: "",
+    occupation: "",
+    monthlyIncome: "",
+    employmentLength: "",
+    workAddress: "",
+    workPhone: "",
+    // Loan Details
+    loanAmount: "",
+    loanPurpose: "",
+    repaymentPeriod: "",
+    existingLoans: false,
+    existingLoanDetails: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -29,7 +43,7 @@ export const LoanApplicationForm = () => {
     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-6 space-y-8">
       <div className="flex items-center gap-4 mb-8">
         <img
-          src="/lovable-uploads/f0fb53a5-a674-4e11-831b-1a03ca06e7eb.png"
+          src="/lovable-uploads/58b13019-da3c-47e4-8458-ebac6ebf7cee.png"
           alt="YES Finance Ltd Logo"
           className="h-16"
         />
@@ -119,7 +133,94 @@ export const LoanApplicationForm = () => {
           <CardTitle>Client's Employment Details</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-          {/* Employment details fields will go here */}
+          <div className="space-y-2">
+            <Label>Employment Status</Label>
+            <RadioGroup
+              value={formData.employmentStatus}
+              onValueChange={(value) =>
+                setFormData({ ...formData, employmentStatus: value })
+              }
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="employed" id="employed" />
+                <Label htmlFor="employed">Employed</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="self-employed" id="self-employed" />
+                <Label htmlFor="self-employed">Self-Employed</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="employerName">Employer Name</Label>
+            <Input
+              id="employerName"
+              value={formData.employerName}
+              onChange={(e) =>
+                setFormData({ ...formData, employerName: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="occupation">Occupation/Position</Label>
+            <Input
+              id="occupation"
+              value={formData.occupation}
+              onChange={(e) =>
+                setFormData({ ...formData, occupation: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="monthlyIncome">Monthly Income (K)</Label>
+            <Input
+              id="monthlyIncome"
+              type="number"
+              value={formData.monthlyIncome}
+              onChange={(e) =>
+                setFormData({ ...formData, monthlyIncome: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="employmentLength">Length of Employment</Label>
+            <Input
+              id="employmentLength"
+              placeholder="e.g., 2 years"
+              value={formData.employmentLength}
+              onChange={(e) =>
+                setFormData({ ...formData, employmentLength: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="workPhone">Work Phone Number</Label>
+            <Input
+              id="workPhone"
+              type="tel"
+              value={formData.workPhone}
+              onChange={(e) =>
+                setFormData({ ...formData, workPhone: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="col-span-2 space-y-2">
+            <Label htmlFor="workAddress">Work Address</Label>
+            <Input
+              id="workAddress"
+              value={formData.workAddress}
+              onChange={(e) =>
+                setFormData({ ...formData, workAddress: e.target.value })
+              }
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -128,7 +229,73 @@ export const LoanApplicationForm = () => {
           <CardTitle>Loan Amount Request</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-          {/* Loan amount request fields will go here */}
+          <div className="space-y-2">
+            <Label htmlFor="loanAmount">Loan Amount Required (K)</Label>
+            <Input
+              id="loanAmount"
+              type="number"
+              value={formData.loanAmount}
+              onChange={(e) =>
+                setFormData({ ...formData, loanAmount: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="repaymentPeriod">Repayment Period (Months)</Label>
+            <Input
+              id="repaymentPeriod"
+              type="number"
+              value={formData.repaymentPeriod}
+              onChange={(e) =>
+                setFormData({ ...formData, repaymentPeriod: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="col-span-2 space-y-2">
+            <Label htmlFor="loanPurpose">Purpose of Loan</Label>
+            <Input
+              id="loanPurpose"
+              value={formData.loanPurpose}
+              onChange={(e) =>
+                setFormData({ ...formData, loanPurpose: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="col-span-2 space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="existingLoans"
+                checked={formData.existingLoans}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, existingLoans: checked as boolean })
+                }
+              />
+              <Label htmlFor="existingLoans">
+                Do you have any existing loans?
+              </Label>
+            </div>
+
+            {formData.existingLoans && (
+              <div className="space-y-2">
+                <Label htmlFor="existingLoanDetails">
+                  Please provide details of existing loans
+                </Label>
+                <Input
+                  id="existingLoanDetails"
+                  value={formData.existingLoanDetails}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      existingLoanDetails: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
