@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Navigation } from "@/components/Navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,21 +20,17 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <div className="container mx-auto flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
-            Or{" "}
-            <a href="/register" className="font-medium text-primary hover:text-primary/90">
-              create a new account
-            </a>
-          </p>
-        </div>
-
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-card px-4 py-8 shadow-sm ring-1 ring-border sm:rounded-lg sm:px-10">
+      <div className="container mx-auto flex flex-col items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              Welcome back
+            </CardTitle>
+            <CardDescription className="text-center">
+              Sign in to your account to continue
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <Auth
               supabaseClient={supabase}
               appearance={{
@@ -41,17 +38,32 @@ const Login = () => {
                 variables: {
                   default: {
                     colors: {
-                      brand: '#0066CC',
-                      brandAccent: '#0052A3',
+                      brand: 'hsl(var(--primary))',
+                      brandAccent: 'hsl(var(--primary))',
+                      brandButtonText: 'hsl(var(--primary-foreground))',
+                    },
+                    borderWidths: {
+                      buttonBorderWidth: '1px',
+                      inputBorderWidth: '1px',
+                    },
+                    radii: {
+                      borderRadiusButton: '0.5rem',
+                      buttonBorderRadius: '0.5rem',
+                      inputBorderRadius: '0.5rem',
                     },
                   },
                 },
+                className: {
+                  container: 'w-full',
+                  button: 'w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90',
+                  input: 'w-full px-3 py-2 border rounded-md',
+                },
               }}
-              theme="light"
+              theme="default"
               providers={[]}
             />
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
