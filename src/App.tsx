@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import { useSession } from "@supabase/auth-helpers-react";
+import { LoanApplicationForm } from "./components/LoanApplicationForm";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -42,16 +43,17 @@ const App: React.FC = () => {
               <Sonner />
               <BrowserRouter>
                 <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
                   <Route
-                    path="/"
+                    path="/apply"
                     element={
                       <ProtectedRoute>
-                        <Index />
+                        <LoanApplicationForm />
                       </ProtectedRoute>
                     }
                   />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
                   <Route
                     path="/dashboard"
                     element={
