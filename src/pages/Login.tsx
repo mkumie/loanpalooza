@@ -22,23 +22,20 @@ const Login = () => {
     // Listen for auth state changes and handle errors
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event) => {
       if (event === 'SIGNED_OUT') {
         setAuthError(null);
       }
-      
-      // Check for auth errors in the session
-      if (!session && event === 'SIGNED_IN') {
-        const error = new URLSearchParams(window.location.search).get('error_description');
-        if (error) {
-          if (error.includes('email_not_confirmed')) {
-            setAuthError('Please check your email and confirm your account before logging in.');
-          } else {
-            setAuthError(error);
-          }
-        }
-      }
     });
+
+    // Check URL for error parameters
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+    
+    if (error === 'unauthorized' && errorDescription?.includes('Email not confirmed')) {
+      setAuthError('Please check your email and confirm your account before logging in.');
+    }
 
     return () => {
       subscription.unsubscribe();
