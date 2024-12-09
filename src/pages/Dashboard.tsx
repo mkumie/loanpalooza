@@ -21,7 +21,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Fetch user profile to check if admin
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
@@ -43,7 +42,6 @@ const Dashboard = () => {
     },
   });
 
-  // Fetch loan applications
   const { data: applications, isLoading, refetch } = useQuery({
     queryKey: ["applications"],
     queryFn: async () => {
@@ -101,7 +99,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex gap-4">
-            <Button onClick={() => navigate("/")}>New Application</Button>
+            <Button onClick={() => navigate("/apply")}>New Application</Button>
             <Button variant="outline" onClick={handleSignOut}>
               Sign Out
             </Button>
