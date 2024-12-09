@@ -6,7 +6,7 @@ export const Navigation = () => {
   const session = useSession();
 
   return (
-    <nav className="border-b bg-white">
+    <nav className="fixed top-0 left-0 right-0 border-b bg-white z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
           <div className="flex items-center gap-4">

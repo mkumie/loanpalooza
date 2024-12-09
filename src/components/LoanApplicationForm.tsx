@@ -100,7 +100,7 @@ const LoanApplicationFormContent = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-6 space-y-8">
+    <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-6 mt-16 space-y-8">
       <FormHeader logoUrl="/lovable-uploads/58b13019-da3c-47e4-8458-ebac6ebf7cee.png" />
       <ProgressStepper />
 

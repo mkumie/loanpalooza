@@ -1,20 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@supabase/auth-helpers-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/components/ui/use-toast";
-import { StatusUpdateControls } from "@/components/loan/StatusUpdateControls";
-import { LoanApplication } from "@/types/loan";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { ApplicationsTable } from "@/components/dashboard/ApplicationsTable";
 
 const Dashboard = () => {
   const session = useSession();
@@ -58,7 +49,7 @@ const Dashboard = () => {
         });
         return [];
       }
-      return data as LoanApplication[];
+      return data;
     },
   });
 
@@ -76,7 +67,7 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 mt-16">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
@@ -88,82 +79,18 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">
-              {profile?.is_admin ? "Admin Dashboard" : "My Applications"}
-            </h1>
-            <p className="text-gray-600">
-              Welcome back, {session?.user?.email}
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <Button onClick={() => navigate("/apply")}>New Application</Button>
-            <Button variant="outline" onClick={handleSignOut}>
-              Sign Out
-            </Button>
-          </div>
-        </div>
-
+      <div className="container mx-auto px-4 py-8 mt-16">
+        <DashboardHeader
+          userEmail={session.user.email}
+          isAdmin={profile?.is_admin}
+          onSignOut={handleSignOut}
+        />
         <div className="bg-white rounded-lg shadow">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Purpose</TableHead>
-                <TableHead>Status</TableHead>
-                {profile?.is_admin && <TableHead>Actions</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {applications?.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell>
-                    {new Date(app.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>${app.loan_amount.toLocaleString()}</TableCell>
-                  <TableCell>{app.loan_purpose}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        app.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : app.status === "rejected"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {app.status}
-                    </span>
-                    {app.admin_comments && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {app.admin_comments}
-                      </p>
-                    )}
-                  </TableCell>
-                  {profile?.is_admin && (
-                    <TableCell>
-                      <StatusUpdateControls
-                        applicationId={app.id}
-                        currentStatus={app.status}
-                        currentComments={app.admin_comments}
-                        onUpdate={refetch}
-                      />
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-              {applications?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={profile?.is_admin ? 5 : 4} className="text-center py-8">
-                    No applications found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <ApplicationsTable
+            applications={applications || []}
+            isAdmin={profile?.is_admin}
+            onUpdate={refetch}
+          />
         </div>
       </div>
     </div>
