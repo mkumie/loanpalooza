@@ -2,6 +2,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect } from "react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PersonalDetailsSectionProps {
   formData: {
@@ -21,6 +25,41 @@ export const PersonalDetailsSection = ({
   formData,
   setFormData,
 }: PersonalDetailsSectionProps) => {
+  const session = useSession();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (session?.user) {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        if (error) {
+          toast({
+            title: "Error",
+            description: "Failed to fetch profile data",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (profile) {
+          setFormData({
+            ...formData,
+            firstName: profile.first_name || formData.firstName,
+            surname: profile.surname || formData.surname,
+            dateOfBirth: profile.date_of_birth || formData.dateOfBirth,
+          });
+        }
+      }
+    };
+
+    fetchProfileData();
+  }, [session]);
+
   return (
     <Card>
       <CardHeader className="bg-primary text-white">
@@ -35,6 +74,7 @@ export const PersonalDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, firstName: e.target.value })
             }
+            readOnly={!!formData.firstName} // Make readonly if pre-filled from profile
           />
         </div>
         <div className="space-y-2">
@@ -45,6 +85,7 @@ export const PersonalDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, surname: e.target.value })
             }
+            readOnly={!!formData.surname} // Make readonly if pre-filled from profile
           />
         </div>
         <div className="space-y-2">
@@ -56,6 +97,7 @@ export const PersonalDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, dateOfBirth: e.target.value })
             }
+            readOnly={!!formData.dateOfBirth} // Make readonly if pre-filled from profile
           />
         </div>
         <div className="space-y-2">
