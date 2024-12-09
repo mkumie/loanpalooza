@@ -126,6 +126,44 @@ export type Database = {
         }
         Relationships: []
       }
+      loan_documents: {
+        Row: {
+          document_type: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+          loan_application_id: string | null
+          uploaded_at: string
+        }
+        Insert: {
+          document_type: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+          loan_application_id?: string | null
+          uploaded_at?: string
+        }
+        Update: {
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          loan_application_id?: string | null
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_documents_loan_application_id_fkey"
+            columns: ["loan_application_id"]
+            isOneToOne: false
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null

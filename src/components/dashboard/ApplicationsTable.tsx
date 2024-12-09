@@ -1,11 +1,17 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusUpdateControls } from "@/components/loan/StatusUpdateControls";
+import { DocumentUpload } from "@/components/loan/DocumentUpload";
 import { LoanApplication } from "@/types/loan";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface ApplicationsTableProps {
   applications: LoanApplication[];
@@ -17,6 +23,7 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate }: Applicati
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const itemsPerPage = 10;
 
   // Filter applications based on search term and status
@@ -65,50 +72,70 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate }: Applicati
             <TableHead>Amount</TableHead>
             <TableHead>Purpose</TableHead>
             <TableHead>Status</TableHead>
-            {isAdmin && <TableHead>Actions</TableHead>}
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {paginatedApplications?.map((app) => (
-            <TableRow key={app.id}>
-              <TableCell>
-                {new Date(app.created_at).toLocaleDateString()}
-              </TableCell>
-              <TableCell>${app.loan_amount.toLocaleString()}</TableCell>
-              <TableCell>{app.loan_purpose}</TableCell>
-              <TableCell>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    app.status === "approved"
-                      ? "bg-green-100 text-green-800"
-                      : app.status === "rejected"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {app.status}
-                </span>
-                {app.admin_comments && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    {app.admin_comments}
-                  </p>
-                )}
-              </TableCell>
-              {isAdmin && (
+            <>
+              <TableRow key={app.id}>
                 <TableCell>
-                  <StatusUpdateControls
-                    applicationId={app.id}
-                    currentStatus={app.status}
-                    currentComments={app.admin_comments}
-                    onUpdate={onUpdate}
-                  />
+                  {new Date(app.created_at).toLocaleDateString()}
                 </TableCell>
-              )}
-            </TableRow>
+                <TableCell>${app.loan_amount.toLocaleString()}</TableCell>
+                <TableCell>{app.loan_purpose}</TableCell>
+                <TableCell>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      app.status === "approved"
+                        ? "bg-green-100 text-green-800"
+                        : app.status === "rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
+                  {app.admin_comments && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {app.admin_comments}
+                    </p>
+                  )}
+                </TableCell>
+                <TableCell className="space-x-2">
+                  {isAdmin && (
+                    <StatusUpdateControls
+                      applicationId={app.id}
+                      currentStatus={app.status}
+                      currentComments={app.admin_comments}
+                      onUpdate={onUpdate}
+                    />
+                  )}
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setExpandedRow(expandedRow === app.id ? null : app.id)}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Documents
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-4">
+                      <DocumentUpload
+                        applicationId={app.id}
+                        onUploadComplete={onUpdate}
+                      />
+                    </CollapsibleContent>
+                  </Collapsible>
+                </TableCell>
+              </TableRow>
+            </>
           ))}
           {(!paginatedApplications || paginatedApplications.length === 0) && (
             <TableRow>
-              <TableCell colSpan={isAdmin ? 5 : 4} className="text-center py-8">
+              <TableCell colSpan={5} className="text-center py-8">
                 No applications found
               </TableCell>
             </TableRow>
