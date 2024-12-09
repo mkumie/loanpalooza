@@ -6,6 +6,8 @@ import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ApplicationsTable } from "@/components/dashboard/ApplicationsTable";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { DashboardChart } from "@/components/dashboard/DashboardChart";
 
 const Dashboard = () => {
   const session = useSession();
@@ -85,7 +87,9 @@ const Dashboard = () => {
           isAdmin={profile?.is_admin}
           onSignOut={handleSignOut}
         />
-        <div className="bg-white rounded-lg shadow">
+        <DashboardStats />
+        <DashboardChart />
+        <div className="mt-8 bg-white rounded-lg shadow">
           <ApplicationsTable
             applications={applications || []}
             isAdmin={profile?.is_admin}
