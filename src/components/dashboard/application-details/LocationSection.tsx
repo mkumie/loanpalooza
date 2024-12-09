@@ -7,7 +7,7 @@ interface LocationSectionProps {
 export const LocationSection = ({ application }: LocationSectionProps) => {
   return (
     <section>
-      <h3 className="font-semibold mb-2">Location</h3>
+      <h3 className="font-semibold mb-2">Location Information</h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm text-muted-foreground">District</label>
