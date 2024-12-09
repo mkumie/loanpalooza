@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SearchFilters } from "./SearchFilters";
 import { Pagination } from "./Pagination";
 import { ApplicationRow } from "./ApplicationRow";
+import { Card } from "@/components/ui/card";
 
 interface ApplicationsTableProps {
   applications: LoanApplication[];
@@ -33,50 +34,58 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate }: Applicati
   const paginatedApplications = filteredApplications?.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="space-y-4">
-      <SearchFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-      />
+    <Card className="overflow-hidden">
+      <div className="p-4 space-y-4">
+        <SearchFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+        />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Purpose</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedApplications?.map((app) => (
-            <ApplicationRow
-              key={app.id}
-              application={app}
-              isAdmin={isAdmin}
-              expandedRow={expandedRow}
-              onExpandRow={setExpandedRow}
-              onUpdate={onUpdate}
-            />
-          ))}
-          {(!paginatedApplications || paginatedApplications.length === 0) && (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center py-8">
-                No applications found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="hidden sm:table-cell">Date</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead className="hidden md:table-cell">Purpose</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedApplications?.map((app) => (
+                <ApplicationRow
+                  key={app.id}
+                  application={app}
+                  isAdmin={isAdmin}
+                  expandedRow={expandedRow}
+                  onExpandRow={setExpandedRow}
+                  onUpdate={onUpdate}
+                />
+              ))}
+              {(!paginatedApplications || paginatedApplications.length === 0) && (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center">
+                    <div className="text-muted-foreground">
+                      No applications found
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
-    </div>
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        )}
+      </div>
+    </Card>
   );
 };
