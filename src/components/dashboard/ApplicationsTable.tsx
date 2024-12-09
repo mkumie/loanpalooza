@@ -24,7 +24,7 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate }: Applicati
   const filteredApplications = applications?.filter((app) => {
     const matchesSearch =
       app.loan_purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.loan_amount.toString().includes(searchTerm);
+      `K ${app.loan_amount}`.includes(searchTerm);
     const matchesStatus = statusFilter === "all" || app.status === statusFilter;
     return matchesSearch && matchesStatus;
   });

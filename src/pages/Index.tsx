@@ -88,7 +88,7 @@ const Index = () => {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="loanAmount">Loan Amount (PGK)</Label>
+                <Label htmlFor="loanAmount">Loan Amount (K)</Label>
                 <Input
                   id="loanAmount"
                   type="number"
@@ -118,7 +118,7 @@ const Index = () => {
                 <div className="mt-4 p-4 bg-primary/10 rounded-lg">
                   <p className="text-sm text-gray-600">Estimated Monthly Payment</p>
                   <p className="text-2xl font-bold text-primary">
-                    PGK {monthlyPayment.toFixed(2)}
+                    K {monthlyPayment.toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
                     *Based on 15% annual interest rate

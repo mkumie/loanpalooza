@@ -47,7 +47,7 @@ export const ApplicationRow = ({
             <TooltipTrigger asChild>
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span>${application.loan_amount.toLocaleString()}</span>
+                <span>K {application.loan_amount.toLocaleString()}</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>

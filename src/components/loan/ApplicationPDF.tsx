@@ -94,7 +94,7 @@ export const ApplicationPDF = ({ application }: ApplicationPDFProps) => {
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Monthly Income:</Text>
-              <Text style={styles.value}>${application.monthly_income.toLocaleString()}</Text>
+              <Text style={styles.value}>K {application.monthly_income.toLocaleString()}</Text>
             </View>
           </View>
 
@@ -102,7 +102,7 @@ export const ApplicationPDF = ({ application }: ApplicationPDFProps) => {
             <Text style={styles.heading}>Loan Details</Text>
             <View style={styles.row}>
               <Text style={styles.label}>Loan Amount:</Text>
-              <Text style={styles.value}>${application.loan_amount.toLocaleString()}</Text>
+              <Text style={styles.value}>K {application.loan_amount.toLocaleString()}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Purpose:</Text>

@@ -49,7 +49,7 @@ export const DashboardStats = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            ${stats?.totalAmount?.toLocaleString() || 0}
+            K {stats?.totalAmount?.toLocaleString() || 0}
           </div>
           <p className="text-xs text-muted-foreground">Total loan value</p>
         </CardContent>
