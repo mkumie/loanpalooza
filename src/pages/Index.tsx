@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Calculator } from "lucide-react";
+import { DocumentChecklist } from "@/components/DocumentChecklist";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -111,6 +112,12 @@ const Index = () => {
               )}
             </div>
           </Card>
+
+          {/* Document Requirements Section */}
+          <div className="py-8">
+            <h2 className="text-2xl font-semibold mb-6">Required Documents</h2>
+            <DocumentChecklist />
+          </div>
 
           <div className="space-y-4">
             <Button size="lg" onClick={handleGetStarted} className="text-lg px-8">
