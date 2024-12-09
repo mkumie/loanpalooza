@@ -7,7 +7,10 @@ import { EmploymentSection } from "./EmploymentSection";
 import { DocumentsSection } from "./DocumentsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Clock, FileText, User, MapPin, Briefcase } from "lucide-react";
+import { Clock, FileText, User, MapPin, Briefcase, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ApplicationPDF } from "@/components/loan/ApplicationPDF";
 
 interface ApplicationDetailsProps {
   application: LoanApplication;
@@ -19,11 +22,24 @@ export const ApplicationDetails = ({ application, isAdmin, onUpdate }: Applicati
   return (
     <ScrollArea className="h-[600px] pr-4">
       <div className="space-y-6">
-        <div className="flex items-center gap-2 text-muted-foreground mb-4">
-          <Clock className="h-4 w-4" />
-          <span className="text-sm">
-            Submitted on {new Date(application.created_at).toLocaleDateString()}
-          </span>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm">
+              Submitted on {new Date(application.created_at).toLocaleDateString()}
+            </span>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4 mr-2" />
+                View Summary
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl h-[80vh]">
+              <ApplicationPDF application={application} />
+            </DialogContent>
+          </Dialog>
         </div>
 
         <section>
@@ -66,7 +82,6 @@ export const ApplicationDetails = ({ application, isAdmin, onUpdate }: Applicati
 
         <Separator />
 
-        {/* Show admin comments to all users, but only allow admins to update */}
         <section>
           <Card>
             <CardHeader>
