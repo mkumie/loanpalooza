@@ -15,7 +15,7 @@ import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanAppl
 import { validateCurrentStep } from "@/utils/loanFormValidation";
 
 const LoanApplicationFormContent = () => {
-  const { formData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
+  const { formData, setFormData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
   const session = useSession();
   const { toast } = useToast();
   const navigate = useNavigate();
