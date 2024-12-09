@@ -1,3 +1,4 @@
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,34 +31,36 @@ const queryClient = new QueryClient({
 });
 
 // App component as a proper function component
-function App() {
+const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionContextProvider supabaseClient={supabase}>
-        <TooltipProvider>
-          <div className="min-h-screen">
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </BrowserRouter>
-          </div>
-        </TooltipProvider>
-      </SessionContextProvider>
-    </QueryClientProvider>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <SessionContextProvider supabaseClient={supabase}>
+          <TooltipProvider>
+            <div className="min-h-screen">
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </BrowserRouter>
+            </div>
+          </TooltipProvider>
+        </SessionContextProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
-}
+};
 
 export default App;
