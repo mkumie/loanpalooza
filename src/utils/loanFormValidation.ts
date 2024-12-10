@@ -1,5 +1,6 @@
 import { LoanApplicationData } from '@/contexts/LoanApplicationContext';
 import { toast } from '@/components/ui/use-toast';
+import { DocumentUploadStatus } from '@/types/documents';
 
 const requiredFields: { [key: number]: (keyof LoanApplicationData)[] } = {
   1: ["firstName", "surname", "dateOfBirth", "gender", "maritalStatus", "district", "village", "homeProvince"],
@@ -22,4 +23,37 @@ export const validateCurrentStep = (currentStep: number, formData: LoanApplicati
     return false;
   }
   return true;
+};
+
+export const validateAllSteps = (formData: LoanApplicationData): string[] => {
+  const missingRequirements: string[] = [];
+
+  // Check all form fields
+  Object.entries(requiredFields).forEach(([step, fields]) => {
+    const emptyFields = fields.filter(field => !formData[field]);
+    if (emptyFields.length > 0) {
+      missingRequirements.push(`Step ${step}: Missing ${emptyFields.length} required field(s)`);
+    }
+  });
+
+  return missingRequirements;
+};
+
+export const showValidationErrors = (missingRequirements: string[]) => {
+  if (missingRequirements.length > 0) {
+    toast({
+      title: "Missing Requirements",
+      description: (
+        <div className="space-y-2">
+          <p>Please complete the following before submitting:</p>
+          <ul className="list-disc pl-4">
+            {missingRequirements.map((req, index) => (
+              <li key={index}>{req}</li>
+            ))}
+          </ul>
+        </div>
+      ),
+      variant: "destructive",
+    });
+  }
 };

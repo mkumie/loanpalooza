@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "./Navigation";
 import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanApplicationContext";
-import { validateCurrentStep } from "@/utils/loanFormValidation";
+import { validateCurrentStep, validateAllSteps, showValidationErrors } from "@/utils/loanFormValidation";
 
 const LoanApplicationFormContent = () => {
   const { formData, setFormData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
@@ -30,6 +30,13 @@ const LoanApplicationFormContent = () => {
 
     if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
+      return;
+    }
+
+    // Validate all steps before final submission
+    const missingRequirements = validateAllSteps(formData);
+    if (missingRequirements.length > 0) {
+      showValidationErrors(missingRequirements);
       return;
     }
 
