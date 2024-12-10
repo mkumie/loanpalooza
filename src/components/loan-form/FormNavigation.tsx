@@ -154,7 +154,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           className="bg-primary hover:bg-primary-600"
           disabled={isSubmitting || isSubmitDisabled}
         >
-          {isSubmitting ? "Saving..." : "Save and Continue"}
+          {isSubmitting ? "Saving..." : hasDataChanged() ? "Save and Continue" : "Next"}
         </Button>
       )}
     </div>
