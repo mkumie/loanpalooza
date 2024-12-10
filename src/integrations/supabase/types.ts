@@ -101,7 +101,6 @@ export type Database = {
           gender: string
           home_province: string
           id: string
-          is_draft: boolean | null
           loan_amount: number
           loan_purpose: string
           marital_status: string
@@ -141,7 +140,6 @@ export type Database = {
           gender: string
           home_province: string
           id?: string
-          is_draft?: boolean | null
           loan_amount: number
           loan_purpose: string
           marital_status: string
@@ -181,7 +179,6 @@ export type Database = {
           gender?: string
           home_province?: string
           id?: string
-          is_draft?: boolean | null
           loan_amount?: number
           loan_purpose?: string
           marital_status?: string

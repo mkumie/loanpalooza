@@ -47,7 +47,7 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
     enabled: !!session,
   });
 
-  const draftApplications = applications?.filter(app => app.is_draft) || [];
+  const draftApplications = applications?.filter(app => app.status === 'draft') || [];
 
   const handleDeleteDraft = async (draftId: string) => {
     try {

@@ -20,8 +20,8 @@ export const ExistingLoansDisplay = ({ existingLoanDetails, setFormData }: Exist
         .from('loan_applications')
         .select('loan_amount, loan_purpose, created_at, reference_number, status')
         .eq('user_id', session.user.id)
-        .eq('is_draft', false)
-        .not('status', 'eq', 'rejected')
+        .neq('status', 'draft')
+        .neq('status', 'rejected')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

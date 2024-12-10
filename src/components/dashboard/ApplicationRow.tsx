@@ -24,7 +24,7 @@ export const ApplicationRow = ({
   onExpandRow,
   onUpdate,
 }: ApplicationRowProps) => {
-  const canUploadDocuments = application.is_draft || application.status === 'pending';
+  const canUploadDocuments = application.status === 'draft' || application.status === 'pending';
 
   return (
     <TableRow key={application.id} className="group hover:bg-muted/50">
