@@ -8,15 +8,49 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@supabase/auth-helpers-react';
 import { useNavigate } from 'react-router-dom';
 
+const transformFormDataToDbFormat = (formData: any, userId: string, isDraft: boolean = true) => {
+  return {
+    user_id: userId,
+    is_draft: isDraft,
+    status: isDraft ? 'draft' : 'pending',
+    first_name: formData.firstName,
+    surname: formData.surname,
+    date_of_birth: formData.dateOfBirth,
+    gender: formData.gender,
+    marital_status: formData.maritalStatus,
+    district: formData.district,
+    village: formData.village,
+    home_province: formData.homeProvince,
+    employment_status: formData.employmentStatus,
+    employer_name: formData.employerName,
+    occupation: formData.occupation,
+    monthly_income: parseFloat(formData.monthlyIncome) || 0,
+    employment_length: formData.employmentLength,
+    work_address: formData.workAddress,
+    work_phone: formData.workPhone,
+    loan_amount: parseFloat(formData.loanAmount) || 0,
+    loan_purpose: formData.loanPurpose,
+    repayment_period: parseInt(formData.repaymentPeriod) || 0,
+    existing_loans: formData.existingLoans,
+    existing_loan_details: formData.existingLoanDetails,
+    reference_full_name: formData.referenceFullName,
+    reference_relationship: formData.referenceRelationship,
+    reference_address: formData.referenceAddress,
+    reference_phone: formData.referencePhone,
+    reference_occupation: formData.referenceOccupation,
+    bank_name: formData.bankName,
+    account_number: formData.accountNumber,
+    account_type: formData.accountType,
+    branch_name: formData.branchName,
+    account_holder_name: formData.accountHolderName
+  };
+};
+
 export const FormNavigation = () => {
   const { currentStep, setCurrentStep, isSubmitting, formData } = useLoanApplication();
   const { toast } = useToast();
   const session = useSession();
   const navigate = useNavigate();
-
-  const handlePrevious = () => {
-    setCurrentStep(Math.max(1, currentStep - 1));
-  };
 
   const handleSaveDraft = async () => {
     if (!session?.user) {
@@ -30,18 +64,17 @@ export const FormNavigation = () => {
     }
 
     try {
-      const { error } = await supabase.from("loan_applications").insert({
-        ...formData,
-        user_id: session.user.id,
-        is_draft: true,
-        status: 'draft'
-      });
+      const transformedData = transformFormDataToDbFormat(formData, session.user.id);
+      
+      const { error } = await supabase
+        .from("loan_applications")
+        .insert(transformedData);
 
       if (error) throw error;
 
       toast({
         title: "Draft Saved",
-        description: "Your application has been saved as a draft. You can continue later from your dashboard.",
+        description: "Your application has been saved as a draft.",
       });
 
       navigate("/dashboard");
@@ -53,6 +86,10 @@ export const FormNavigation = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(Math.max(1, currentStep - 1));
   };
 
   const missingRequirements = currentStep === 6 ? validateAllSteps(formData) : [];
