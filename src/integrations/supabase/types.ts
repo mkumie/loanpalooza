@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      downloadable_files: {
+        Row: {
+          category: Database["public"]["Enums"]["file_category"]
+          created_at: string
+          description: string | null
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["file_category"]
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["file_category"]
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       loan_applications: {
         Row: {
           account_holder_name: string
@@ -208,6 +250,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      file_category: "policy" | "form" | "guide" | "other"
       loan_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {

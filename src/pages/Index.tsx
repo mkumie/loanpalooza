@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Calculator, GraduationCap, Wallet, RefreshCw } from "lucide-react";
+import { Calculator, GraduationCap, Wallet, RefreshCw, Download } from "lucide-react";
 import { DocumentChecklist } from "@/components/DocumentChecklist";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -15,6 +17,20 @@ const Index = () => {
   const [loanAmount, setLoanAmount] = useState<string>("");
   const [loanTerm, setLoanTerm] = useState<string>("");
   const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
+
+  const { data: downloadableFiles } = useQuery({
+    queryKey: ["downloadableFiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("downloadable_files")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleGetStarted = () => {
     if (session) {
@@ -24,16 +40,38 @@ const Index = () => {
     }
   };
 
-  const calculateMonthlyPayment = () => {
+  const calculateFortnightlyPayment = () => {
     const principal = parseFloat(loanAmount);
-    const months = parseFloat(loanTerm) * 12;
-    const interestRate = 0.15 / 12; // 15% annual interest rate
+    const fortnights = parseFloat(loanTerm) * 26; // 26 fortnights in a year
+    const fortnightlyInterestRate = 0.15 / 26; // 15% annual interest rate divided by 26 fortnights
 
-    if (principal && months) {
+    if (principal && fortnights) {
       const payment =
-        (principal * interestRate * Math.pow(1 + interestRate, months)) /
-        (Math.pow(1 + interestRate, months) - 1);
+        (principal * fortnightlyInterestRate * Math.pow(1 + fortnightlyInterestRate, fortnights)) /
+        (Math.pow(1 + fortnightlyInterestRate, fortnights) - 1);
       setMonthlyPayment(payment);
+    }
+  };
+
+  const handleDownload = async (filePath: string, fileName: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from("downloadable_files")
+        .download(filePath);
+
+      if (error) throw error;
+
+      // Create a download link
+      const url = URL.createObjectURL(data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download error:", error);
     }
   };
 
@@ -47,7 +85,7 @@ const Index = () => {
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             YES Finance provides accessible loan solutions to Papua New Guinea residents. 
-            We offer competitive rates, flexible repayment terms, and a simple online application process.
+            We offer competitive rates, flexible fortnightly repayments, and a simple online application process.
           </p>
           
           <div className="grid gap-6 md:grid-cols-3 max-w-3xl mx-auto py-8">
@@ -108,7 +146,7 @@ const Index = () => {
                 />
               </div>
               <Button
-                onClick={calculateMonthlyPayment}
+                onClick={calculateFortnightlyPayment}
                 className="w-full"
                 disabled={!loanAmount || !loanTerm}
               >
@@ -116,7 +154,7 @@ const Index = () => {
               </Button>
               {monthlyPayment && (
                 <div className="mt-4 p-4 bg-primary/10 rounded-lg">
-                  <p className="text-sm text-gray-600">Estimated Monthly Payment</p>
+                  <p className="text-sm text-gray-600">Estimated Fortnightly Payment</p>
                   <p className="text-2xl font-bold text-primary">
                     K {monthlyPayment.toFixed(2)}
                   </p>
@@ -127,6 +165,37 @@ const Index = () => {
               )}
             </div>
           </Card>
+
+          {/* Downloadable Files Section */}
+          {downloadableFiles && downloadableFiles.length > 0 && (
+            <Card className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Download className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-semibold">Important Documents</h2>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {downloadableFiles.map((file) => (
+                  <Card key={file.id} className="p-4 hover:bg-gray-50">
+                    <div className="space-y-2">
+                      <h3 className="font-medium">{file.title}</h3>
+                      {file.description && (
+                        <p className="text-sm text-gray-600">{file.description}</p>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => handleDownload(file.file_path, file.file_name)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Document Requirements Section */}
           <div className="py-8">
