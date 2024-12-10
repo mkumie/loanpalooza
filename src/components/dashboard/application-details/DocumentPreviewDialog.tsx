@@ -22,7 +22,7 @@ export const DocumentPreviewDialog = ({ fileName, onView, viewUrl, fileType }: D
           View
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-4xl max-h-[90vh] pt-10">
         <DialogTitle>Document Preview</DialogTitle>
         <DialogDescription>
           Viewing: {fileName}
