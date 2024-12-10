@@ -21,6 +21,34 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
   const [previousFormData, setPreviousFormData] = React.useState(formData);
 
   const hasDataChanged = () => {
+    // For personal details step, exclude pre-filled fields from change detection
+    if (currentStep === 1) {
+      const { firstName, surname, dateOfBirth, gender } = formData;
+      const preFilledFields = { firstName, surname, dateOfBirth, gender };
+      const previousPreFilledFields = {
+        firstName: previousFormData.firstName,
+        surname: previousFormData.surname,
+        dateOfBirth: previousFormData.dateOfBirth,
+        gender: previousFormData.gender
+      };
+      
+      // Only check non-prefilled fields for changes
+      const currentStepData = { ...formData };
+      const previousStepData = { ...previousFormData };
+      
+      delete currentStepData.firstName;
+      delete currentStepData.surname;
+      delete currentStepData.dateOfBirth;
+      delete currentStepData.gender;
+      
+      delete previousStepData.firstName;
+      delete previousStepData.surname;
+      delete previousStepData.dateOfBirth;
+      delete previousStepData.gender;
+      
+      return JSON.stringify(currentStepData) !== JSON.stringify(previousStepData);
+    }
+    
     return JSON.stringify(formData) !== JSON.stringify(previousFormData);
   };
 
