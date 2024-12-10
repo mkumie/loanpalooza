@@ -16,6 +16,8 @@ interface ApplicationDetailsProps {
 }
 
 export const ApplicationDetails = ({ application, isAdmin, onUpdate }: ApplicationDetailsProps) => {
+  const showStatusControls = isAdmin && !application.is_draft;
+
   return (
     <ScrollArea className="h-[600px] pr-4">
       <div className="space-y-6">
@@ -61,13 +63,15 @@ export const ApplicationDetails = ({ application, isAdmin, onUpdate }: Applicati
 
         <Separator />
 
-        <section>
-          <StatusSection 
-            application={application}
-            isAdmin={isAdmin}
-            onUpdate={onUpdate}
-          />
-        </section>
+        {showStatusControls && (
+          <section>
+            <StatusSection 
+              application={application}
+              isAdmin={isAdmin}
+              onUpdate={onUpdate}
+            />
+          </section>
+        )}
       </div>
     </ScrollArea>
   );

@@ -24,6 +24,8 @@ export const ApplicationRow = ({
   onExpandRow,
   onUpdate,
 }: ApplicationRowProps) => {
+  const canUploadDocuments = application.is_draft || application.status === 'pending';
+
   return (
     <TableRow key={application.id} className="group hover:bg-muted/50">
       <TableCell className="hidden sm:table-cell">
@@ -95,22 +97,24 @@ export const ApplicationRow = ({
             </DialogContent>
           </Dialog>
 
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onExpandRow(expandedRow === application.id ? null : application.id)}
-                className="hover:bg-primary/10"
-              >
-                <Upload className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Documents</span>
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-4">
-              <DocumentUpload applicationId={application.id} onUploadComplete={onUpdate} />
-            </CollapsibleContent>
-          </Collapsible>
+          {canUploadDocuments && (
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onExpandRow(expandedRow === application.id ? null : application.id)}
+                  className="hover:bg-primary/10"
+                >
+                  <Upload className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Documents</span>
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <DocumentUpload applicationId={application.id} onUploadComplete={onUpdate} />
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </div>
       </TableCell>
     </TableRow>
