@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
+import { LoanStatus } from "@/types/loan";
 
 interface FormNavigationProps {
   isSubmitDisabled?: boolean;
@@ -27,7 +28,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     try {
       const transformedData = {
         user_id: session.user.id,
-        status: 'draft',
+        status: 'draft' as LoanStatus,
         first_name: formData.firstName,
         surname: formData.surname,
         date_of_birth: formData.dateOfBirth,
