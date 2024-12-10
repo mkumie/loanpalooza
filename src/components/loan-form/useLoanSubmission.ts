@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { LoanStatus } from "@/types/loan";
 
 export const useLoanSubmission = (formData: LoanApplicationData) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +27,7 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
       
       const applicationData = {
         user_id: user.id,
-        status: 'pending',
+        status: 'pending' as LoanStatus,
         first_name: formData.firstName,
         surname: formData.surname,
         date_of_birth: formData.dateOfBirth,
