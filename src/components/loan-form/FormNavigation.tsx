@@ -19,11 +19,15 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draft');
   const [previousFormData, setPreviousFormData] = React.useState(formData);
+  const [isInitialized, setIsInitialized] = React.useState(false);
 
   // Update previousFormData when formData is loaded from draft
   React.useEffect(() => {
-    setPreviousFormData(formData);
-  }, [draftId]);
+    if (draftId && !isInitialized && Object.values(formData).some(value => value !== "")) {
+      setPreviousFormData(formData);
+      setIsInitialized(true);
+    }
+  }, [draftId, formData, isInitialized]);
 
   const hasDataChanged = () => {
     // For personal details step, exclude pre-filled fields from change detection
