@@ -17,12 +17,22 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draft');
+  const [previousFormData, setPreviousFormData] = React.useState(formData);
+
+  const hasDataChanged = () => {
+    return JSON.stringify(formData) !== JSON.stringify(previousFormData);
+  };
 
   const handleSaveDraft = async () => {
     if (!session?.user) {
       toast.error("Please log in to save your application.");
       navigate("/login");
       return;
+    }
+
+    if (!hasDataChanged()) {
+      console.log("No changes detected, skipping save");
+      return draftId;
     }
 
     try {
@@ -80,6 +90,9 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
 
       if (result.error) throw result.error;
 
+      // Update the previous form data after successful save
+      setPreviousFormData(formData);
+      
       toast.success("Progress saved successfully");
       
       if (!draftId && result.data?.id) {
