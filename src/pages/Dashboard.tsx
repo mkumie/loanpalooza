@@ -7,12 +7,27 @@ import { ApplicationsTable } from "@/components/dashboard/ApplicationsTable";
 import { FileManagement } from "@/components/dashboard/FileManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { LoanApplication } from "@/types/loan";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userEmail, setUserEmail] = useState<string>();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const { data: applications, refetch: refetchApplications } = useQuery({
+    queryKey: ["loan-applications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("loan_applications")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data as LoanApplication[];
+    },
+  });
 
   useEffect(() => {
     const getProfile = async () => {
@@ -77,7 +92,11 @@ const Dashboard = () => {
 
             <TabsContent value="applications" className="space-y-8">
               <DashboardStats isAdmin={isAdmin} />
-              <ApplicationsTable isAdmin={isAdmin} />
+              <ApplicationsTable 
+                applications={applications || []} 
+                isAdmin={isAdmin}
+                onUpdate={refetchApplications}
+              />
             </TabsContent>
 
             {isAdmin && (
