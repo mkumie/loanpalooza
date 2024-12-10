@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 import { toast } from "sonner";
@@ -5,19 +6,23 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { LoanStatus } from "@/types/loan";
 
 export const useLoanSubmission = (formData: LoanApplicationData) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draft');
 
   const handleSubmit = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      toast.error("You must be logged in to submit an application");
-      return null;
-    }
-
+    if (isSubmitting) return null;
+    
+    setIsSubmitting(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("You must be logged in to submit an application");
+        return null;
+      }
+
       console.log("Starting application submission process");
       console.log("Draft ID:", draftId);
       
@@ -59,7 +64,6 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
       let result;
       
       if (draftId) {
-        // Update existing draft application
         console.log("Updating existing draft application:", draftId);
         const { data, error } = await supabase
           .from("loan_applications")
@@ -73,7 +77,6 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
         if (error) throw error;
         result = data;
       } else {
-        // Create new application
         console.log("Creating new application");
         const { data, error } = await supabase
           .from("loan_applications")
@@ -114,10 +117,14 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
       console.error("Error submitting application:", error);
       toast.error(error.message || "Failed to submit application");
       return null;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return {
+    isSubmitting,
+    setIsSubmitting,
     handleSubmit
   };
 };

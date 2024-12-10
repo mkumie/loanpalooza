@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const useTermsAcceptance = (draftId: string | null) => {
-  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
 
   const recordTermsAcceptance = async () => {
     try {
@@ -11,7 +11,7 @@ export const useTermsAcceptance = (draftId: string | null) => {
       const { data: latestTerms, error: termsError } = await supabase
         .from("terms_versions")
         .select("id")
-        .order("effective_date", { ascending: false })
+        .order('effective_date', { ascending: false })
         .limit(1)
         .single();
 
@@ -27,9 +27,9 @@ export const useTermsAcceptance = (draftId: string | null) => {
           .from("terms_acceptances")
           .select("id")
           .eq("loan_application_id", draftId)
-          .maybeSingle(); // Use maybeSingle instead of single to handle no results gracefully
+          .maybeSingle();
 
-        if (existingError && existingError.code !== 'PGRST116') { // Ignore "no rows returned" error
+        if (existingError && existingError.code !== 'PGRST116') {
           console.error("Error checking existing terms acceptance:", existingError);
           toast.error("Failed to verify terms acceptance");
           return false;
@@ -39,21 +39,6 @@ export const useTermsAcceptance = (draftId: string | null) => {
         if (existingAcceptance) {
           return true;
         }
-      }
-
-      // Record the terms acceptance
-      const { error: acceptanceError } = await supabase
-        .from("terms_acceptances")
-        .insert({
-          terms_version_id: latestTerms.id,
-          loan_application_id: draftId,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
-        });
-
-      if (acceptanceError) {
-        console.error("Error recording terms acceptance:", acceptanceError);
-        toast.error("Failed to record terms acceptance");
-        return false;
       }
 
       return true;
