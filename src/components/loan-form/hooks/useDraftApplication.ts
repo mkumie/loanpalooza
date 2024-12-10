@@ -13,18 +13,19 @@ export const useDraftApplication = () => {
   const session = useSession();
 
   const { data: draftData } = useQuery({
-    queryKey: ['draft-application', draftId],
+    queryKey: ['draft-application', draftId, session?.user?.id],
     queryFn: async () => {
-      if (!draftId || !session?.user) return null;
+      if (!draftId || !session?.user) {
+        console.log("No draft ID or session, skipping fetch");
+        return null;
+      }
 
-      console.log("Fetching draft application:", draftId);
+      console.log("Fetching draft application with ID:", draftId);
       
       const { data, error } = await supabase
         .from('loan_applications')
         .select('*')
         .eq('id', draftId)
-        .eq('user_id', session.user.id)
-        .eq('status', 'draft')
         .single();
 
       if (error) {
@@ -33,7 +34,14 @@ export const useDraftApplication = () => {
         return null;
       }
 
-      console.log("Draft data fetched:", data);
+      // Verify the draft belongs to the user
+      if (data.user_id !== session.user.id) {
+        console.error('Draft does not belong to current user');
+        toast.error('You do not have permission to view this draft');
+        return null;
+      }
+
+      console.log("Draft data fetched successfully:", data);
       return data;
     },
     enabled: !!draftId && !!session?.user,
