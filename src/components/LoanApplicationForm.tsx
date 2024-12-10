@@ -11,6 +11,7 @@ import { Navigation } from "./Navigation";
 import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanApplicationContext";
 import { validateCurrentStep, validateAllSteps, showValidationErrors } from "@/utils/loanFormValidation";
 import { DocumentUpload } from "./loan/DocumentUpload";
+import { TermsAndConditions } from "./loan-form/TermsAndConditions";
 import { useFormSubmission } from "./loan-form/useFormSubmission";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,7 @@ const LoanApplicationFormContent = () => {
   const [searchParams] = useSearchParams();
   const [validationErrors, setValidationErrors] = React.useState<Record<string, string>>({});
   const [areDocumentsValid, setAreDocumentsValid] = React.useState(false);
+  const [termsAgreed, setTermsAgreed] = React.useState(false);
   const draftId = searchParams.get('draft');
 
   useEffect(() => {
@@ -90,15 +92,25 @@ const LoanApplicationFormContent = () => {
       return;
     }
 
-    // If we're not on the final documents step, just move to next step
-    if (currentStep < 6) {
+    // If we're not on the final terms step, just move to next step
+    if (currentStep < 7) {
+      // If moving to terms step, check documents first
+      if (currentStep === 6 && !areDocumentsValid) {
+        toast.error("Please upload all required documents before proceeding");
+        return;
+      }
       setCurrentStep(currentStep + 1);
       return;
     }
 
-    // Check if required documents are uploaded
+    // Final submission checks
     if (!areDocumentsValid) {
       toast.error("Please upload all required documents before submitting");
+      return;
+    }
+
+    if (!termsAgreed) {
+      toast.error("Please agree to the terms and conditions before submitting");
       return;
     }
 
@@ -162,9 +174,20 @@ const LoanApplicationFormContent = () => {
               onValidationChange={setAreDocumentsValid}
             />
           )}
+          {currentStep === 7 && (
+            <TermsAndConditions
+              agreed={termsAgreed}
+              onAgreeChange={setTermsAgreed}
+            />
+          )}
         </div>
 
-        <FormNavigation isSubmitDisabled={currentStep === 6 && !areDocumentsValid} />
+        <FormNavigation 
+          isSubmitDisabled={
+            (currentStep === 6 && !areDocumentsValid) || 
+            (currentStep === 7 && !termsAgreed)
+          } 
+        />
       </form>
     </div>
   );

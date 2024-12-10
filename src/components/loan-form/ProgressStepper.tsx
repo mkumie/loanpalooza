@@ -9,7 +9,8 @@ export const ProgressStepper = () => {
     "Loan Details",
     "References",
     "Bank Account",
-    "Documents"
+    "Documents",
+    "Terms"
   ];
 
   return (
