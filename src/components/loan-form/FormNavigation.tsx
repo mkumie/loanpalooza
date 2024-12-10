@@ -64,7 +64,6 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
       let result;
       
       if (draftId) {
-        // Update existing draft
         result = await supabase
           .from("loan_applications")
           .update(transformedData)
@@ -72,44 +71,18 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           .select()
           .single();
       } else {
-        // Check for existing draft
-        const { data: existingDraft, error: existingError } = await supabase
+        result = await supabase
           .from("loan_applications")
-          .select("id")
-          .eq("user_id", session.user.id)
-          .eq("status", "draft")
-          .maybeSingle();
-
-        if (existingError && existingError.code !== 'PGRST116') {
-          console.error("Error checking existing draft:", existingError);
-          toast.error("Failed to save draft");
-          return;
-        }
-
-        if (existingDraft) {
-          // Update existing draft
-          result = await supabase
-            .from("loan_applications")
-            .update(transformedData)
-            .eq("id", existingDraft.id)
-            .select()
-            .single();
-        } else {
-          // Create new draft
-          result = await supabase
-            .from("loan_applications")
-            .insert(transformedData)
-            .select()
-            .single();
-        }
+          .insert(transformedData)
+          .select()
+          .single();
       }
 
       if (result.error) throw result.error;
 
       toast.success("Draft saved successfully");
-      // Stay on the current page/section instead of navigating away
-      if (!draftId) {
-        // Only update URL if we're not already working with a draft
+      
+      if (!draftId && result.data?.id) {
         navigate(`/apply?draft=${result.data.id}`, { replace: true });
       }
     } catch (error: any) {
@@ -120,6 +93,24 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
 
   const handlePrevious = () => {
     setCurrentStep(Math.max(1, currentStep - 1));
+  };
+
+  const handleNext = async () => {
+    // Save progress before moving to next step
+    await handleSaveDraft();
+    
+    // Only proceed to next step if we're not on document upload or terms
+    if (currentStep < 5) {
+      setCurrentStep(currentStep + 1);
+    } else if (currentStep === 5) {
+      // For bank details step, ensure we have an application ID before proceeding
+      const applicationId = searchParams.get('draft');
+      if (!applicationId) {
+        toast.error("Unable to proceed - application ID not found");
+        return;
+      }
+      setCurrentStep(6);
+    }
   };
 
   return (
@@ -144,26 +135,22 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
         >
           Save Draft
         </Button>
-        {currentStep === 5 ? (
+        {currentStep === 7 ? (
           <Button 
             type="submit" 
             className="bg-primary hover:bg-primary-600"
             disabled={isSubmitting || isSubmitDisabled}
           >
-            {isSubmitting ? "Saving..." : "Save and Continue"}
+            {isSubmitting ? "Submitting..." : "Submit Application"}
           </Button>
         ) : (
           <Button 
-            type="submit" 
+            type="button"
+            onClick={handleNext}
             className="bg-primary hover:bg-primary-600"
             disabled={isSubmitting || isSubmitDisabled}
           >
-            {isSubmitting 
-              ? "Submitting..." 
-              : currentStep === 7
-                ? "Submit Application" 
-                : "Next"
-            }
+            {isSubmitting ? "Saving..." : "Next"}
           </Button>
         )}
       </div>
