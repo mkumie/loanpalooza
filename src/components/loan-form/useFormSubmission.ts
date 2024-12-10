@@ -24,13 +24,13 @@ const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: stri
     employment_status: formData.employmentStatus,
     employer_name: formData.employerName,
     occupation: formData.occupation,
-    monthly_income: parseFloat(formData.monthlyIncome),
+    monthly_income: parseFloat(formData.monthlyIncome || '0'),
     employment_length: formData.employmentLength,
     work_address: formData.workAddress,
     work_phone: formData.workPhone,
-    loan_amount: parseFloat(formData.loanAmount),
+    loan_amount: parseFloat(formData.loanAmount || '0'),
     loan_purpose: formData.loanPurpose,
-    repayment_period: parseInt(formData.repaymentPeriod),
+    repayment_period: parseInt(formData.repaymentPeriod || '0'),
     existing_loans: formData.existingLoans,
     existing_loan_details: formData.existingLoanDetails,
     reference_full_name: formData.referenceFullName,
@@ -44,6 +44,22 @@ const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: stri
     branch_name: formData.branchName,
     account_holder_name: formData.accountHolderName
   };
+};
+
+const updateUserProfile = async (userId: string, formData: LoanApplicationData) => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      first_name: formData.firstName,
+      surname: formData.surname,
+      date_of_birth: formData.dateOfBirth,
+      gender: formData.gender,
+    })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error updating profile:', error);
+  }
 };
 
 export const useFormSubmission = (
@@ -77,6 +93,9 @@ export const useFormSubmission = (
         .single();
 
       if (error) throw error;
+
+      // Update profile information
+      await updateUserProfile(session.user.id, formData);
 
       toast({
         title: "Application Submitted",

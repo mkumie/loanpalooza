@@ -7,6 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LoanApplication } from "@/types/loan";
 import { useSession } from "@supabase/auth-helpers-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { FileEdit } from "lucide-react";
 
 interface DashboardContentProps {
   isAdmin: boolean;
@@ -14,14 +18,16 @@ interface DashboardContentProps {
 
 export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
   const session = useSession();
+  const navigate = useNavigate();
 
   const { data: applications, refetch: refetchApplications } = useQuery({
     queryKey: ["loan-applications"],
     queryFn: async () => {
+      if (!session?.user?.id) return [];
       const { data, error } = await supabase
         .from("loan_applications")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as LoanApplication[];
@@ -29,8 +35,36 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
     enabled: !!session,
   });
 
+  const draftApplications = applications?.filter(app => app.is_draft) || [];
+
   return (
     <div className="mt-8">
+      {draftApplications.length > 0 && (
+        <Card className="p-6 mb-8">
+          <h2 className="text-lg font-semibold mb-4">Draft Applications</h2>
+          <div className="space-y-4">
+            {draftApplications.map((draft) => (
+              <div key={draft.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <div>
+                  <p className="font-medium">Loan Amount: K {draft.loan_amount.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Last updated: {new Date(draft.updated_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => navigate(`/apply?draft=${draft.id}`)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <FileEdit className="h-4 w-4" />
+                  Continue Application
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       <Tabs defaultValue="applications">
         <TabsList>
           <TabsTrigger value="applications">Applications</TabsTrigger>

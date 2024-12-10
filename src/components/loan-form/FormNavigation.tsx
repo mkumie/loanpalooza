@@ -2,7 +2,6 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useLoanApplication } from '@/contexts/LoanApplicationContext';
 import { validateAllSteps } from '@/utils/loanFormValidation';
-import { useFormSubmission } from './useFormSubmission';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@supabase/auth-helpers-react';
@@ -50,6 +49,22 @@ const transformFormDataToDbFormat = (formData: any, userId: string, isDraft: boo
   };
 };
 
+const updateUserProfile = async (userId: string, formData: any) => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      first_name: formData.firstName,
+      surname: formData.surname,
+      date_of_birth: formData.dateOfBirth,
+      gender: formData.gender,
+    })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error updating profile:', error);
+  }
+};
+
 export const FormNavigation = () => {
   const { currentStep, setCurrentStep, isSubmitting, formData } = useLoanApplication();
   const { toast } = useToast();
@@ -75,6 +90,11 @@ export const FormNavigation = () => {
         .insert(transformedData);
 
       if (error) throw error;
+
+      // Update profile if we're on the personal details step or beyond
+      if (currentStep >= 1) {
+        await updateUserProfile(session.user.id, formData);
+      }
 
       toast({
         title: "Draft Saved",
