@@ -1,114 +1,93 @@
-import React from 'react';
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { useLoanApplication } from '@/contexts/LoanApplicationContext';
-import { validateAllSteps } from '@/utils/loanFormValidation';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useSession } from '@supabase/auth-helpers-react';
-import { useNavigate } from 'react-router-dom';
-
-type LoanStatus = "pending" | "approved" | "rejected" | "draft";
-
-const transformFormDataToDbFormat = (formData: any, userId: string, isDraft: boolean = true) => {
-  const status: LoanStatus = isDraft ? "draft" : "pending";
-  
-  return {
-    user_id: userId,
-    is_draft: isDraft,
-    status,
-    first_name: formData.firstName,
-    surname: formData.surname,
-    date_of_birth: formData.dateOfBirth,
-    gender: formData.gender,
-    marital_status: formData.maritalStatus,
-    district: formData.district,
-    village: formData.village,
-    home_province: formData.homeProvince,
-    employment_status: formData.employmentStatus,
-    employer_name: formData.employerName,
-    occupation: formData.occupation,
-    monthly_income: parseFloat(formData.monthlyIncome || '0'),
-    employment_length: formData.employmentLength,
-    work_address: formData.workAddress,
-    work_phone: formData.workPhone,
-    loan_amount: parseFloat(formData.loanAmount || '0'),
-    loan_purpose: formData.loanPurpose,
-    repayment_period: parseInt(formData.repaymentPeriod || '0'),
-    existing_loans: formData.existingLoans,
-    existing_loan_details: formData.existingLoanDetails,
-    reference_full_name: formData.referenceFullName,
-    reference_relationship: formData.referenceRelationship,
-    reference_address: formData.referenceAddress,
-    reference_phone: formData.referencePhone,
-    reference_occupation: formData.referenceOccupation,
-    bank_name: formData.bankName,
-    account_number: formData.accountNumber,
-    account_type: formData.accountType,
-    branch_name: formData.branchName,
-    account_holder_name: formData.accountHolderName
-  };
-};
-
-const updateUserProfile = async (userId: string, formData: any) => {
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      first_name: formData.firstName,
-      surname: formData.surname,
-      date_of_birth: formData.dateOfBirth,
-      gender: formData.gender,
-    })
-    .eq('id', userId);
-
-  if (error) {
-    console.error('Error updating profile:', error);
-  }
-};
+import { useLoanApplication } from "@/contexts/LoanApplicationContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export const FormNavigation = () => {
   const { currentStep, setCurrentStep, isSubmitting, formData } = useLoanApplication();
-  const { toast } = useToast();
   const session = useSession();
   const navigate = useNavigate();
 
   const handleSaveDraft = async () => {
     if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to save your application.",
-        variant: "destructive",
-      });
+      toast.error("Please log in to save your application.");
       navigate("/login");
       return;
     }
 
     try {
-      const transformedData = transformFormDataToDbFormat(formData, session.user.id, true);
-      
-      const { error } = await supabase
+      // First, check if user has an existing draft
+      const { data: existingDrafts } = await supabase
         .from("loan_applications")
-        .insert(transformedData);
+        .select("id")
+        .eq("user_id", session.user.id)
+        .eq("is_draft", true)
+        .single();
 
-      if (error) throw error;
+      const transformedData = {
+        user_id: session.user.id,
+        is_draft: true,
+        first_name: formData.firstName,
+        surname: formData.surname,
+        date_of_birth: formData.dateOfBirth,
+        gender: formData.gender,
+        marital_status: formData.maritalStatus,
+        district: formData.district,
+        village: formData.village,
+        home_province: formData.homeProvince,
+        employment_status: formData.employmentStatus,
+        employer_name: formData.employerName,
+        occupation: formData.occupation,
+        monthly_income: parseFloat(formData.monthlyIncome || '0'),
+        employment_length: formData.employmentLength,
+        work_address: formData.workAddress,
+        work_phone: formData.workPhone,
+        loan_amount: parseFloat(formData.loanAmount || '0'),
+        loan_purpose: formData.loanPurpose,
+        repayment_period: parseInt(formData.repaymentPeriod || '0'),
+        existing_loans: formData.existingLoans,
+        existing_loan_details: formData.existingLoanDetails,
+        reference_full_name: formData.referenceFullName,
+        reference_relationship: formData.referenceRelationship,
+        reference_address: formData.referenceAddress,
+        reference_phone: formData.referencePhone,
+        reference_occupation: formData.referenceOccupation,
+        bank_name: formData.bankName,
+        account_number: formData.accountNumber,
+        account_type: formData.accountType,
+        branch_name: formData.branchName,
+        account_holder_name: formData.accountHolderName,
+      };
 
-      // Update profile if we're on the personal details step or beyond
-      if (currentStep >= 1) {
-        await updateUserProfile(session.user.id, formData);
+      let result;
+      
+      if (existingDrafts) {
+        // Update existing draft
+        result = await supabase
+          .from("loan_applications")
+          .update(transformedData)
+          .eq("id", existingDrafts.id)
+          .select()
+          .single();
+      } else {
+        // Create new draft
+        result = await supabase
+          .from("loan_applications")
+          .insert(transformedData)
+          .select()
+          .single();
       }
 
-      toast({
-        title: "Draft Saved",
-        description: "Your application has been saved as a draft.",
-      });
+      if (result.error) throw result.error;
 
+      toast.success("Draft saved successfully");
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving draft:", error);
-      toast({
-        title: "Error",
-        description: "There was an error saving your draft. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to save draft");
     }
   };
 
