@@ -1,8 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { useSessionCheck } from "@/hooks/useSessionCheck";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const navigate = useNavigate();
