@@ -36,6 +36,7 @@ export const PersonalDetailsSection = () => {
             firstName: profile.first_name || prev.firstName,
             surname: profile.surname || prev.surname,
             dateOfBirth: profile.date_of_birth || prev.dateOfBirth,
+            gender: profile.gender || prev.gender, // Added gender prefill
           }));
         }
       }
@@ -97,6 +98,7 @@ export const PersonalDetailsSection = () => {
               setFormData({ ...formData, gender: value })
             }
             className="flex space-x-4"
+            disabled={!!formData.gender} // Disable if prefilled from profile
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="male" id="male" />

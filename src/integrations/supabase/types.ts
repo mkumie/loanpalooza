@@ -212,6 +212,7 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           first_name: string | null
+          gender: string | null
           id: string
           is_admin: boolean | null
           phone_number: string | null
@@ -223,6 +224,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           first_name?: string | null
+          gender?: string | null
           id: string
           is_admin?: boolean | null
           phone_number?: string | null
@@ -234,6 +236,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           first_name?: string | null
+          gender?: string | null
           id?: string
           is_admin?: boolean | null
           phone_number?: string | null
