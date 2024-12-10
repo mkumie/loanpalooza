@@ -53,34 +53,19 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
     try {
       console.log("Attempting to delete draft:", draftId);
       
-      // First delete any terms acceptances for this draft
-      const { error: termsDeleteError } = await supabase
-        .from("terms_acceptances")
-        .delete()
-        .eq('loan_application_id', draftId);
+      // Start a transaction using RPC to ensure atomic operations
+      const { data: result, error: rpcError } = await supabase
+        .rpc('delete_draft_application', {
+          draft_id: draftId,
+          user_id_input: session?.user?.id
+        });
 
-      if (termsDeleteError) {
-        console.error("Error deleting terms acceptances:", termsDeleteError);
-        throw termsDeleteError;
+      if (rpcError) {
+        console.error("Error in delete_draft_application RPC:", rpcError);
+        throw rpcError;
       }
 
-      console.log("Terms acceptances deleted successfully");
-
-      // Then delete the draft application
-      const { error: deleteError } = await supabase
-        .from("loan_applications")
-        .delete()
-        .eq('id', draftId)
-        .eq('user_id', session?.user?.id)
-        .eq('is_draft', true)
-        .single();
-
-      if (deleteError) {
-        console.error("Error deleting draft:", deleteError);
-        throw deleteError;
-      }
-
-      console.log("Draft deleted successfully");
+      console.log("Draft deletion result:", result);
       toast.success("Draft application deleted successfully");
       refetchApplications();
     } catch (error: any) {
