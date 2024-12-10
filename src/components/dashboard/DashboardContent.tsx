@@ -10,7 +10,8 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { FileEdit } from "lucide-react";
+import { FileEdit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface DashboardContentProps {
   isAdmin: boolean;
@@ -37,6 +38,34 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
 
   const draftApplications = applications?.filter(app => app.is_draft) || [];
 
+  const handleDeleteDraft = async (draftId: string) => {
+    try {
+      // First delete any terms acceptances for this draft
+      const { error: termsDeleteError } = await supabase
+        .from("terms_acceptances")
+        .delete()
+        .eq('loan_application_id', draftId);
+
+      if (termsDeleteError) throw termsDeleteError;
+
+      // Then delete the draft application
+      const { error: deleteError } = await supabase
+        .from("loan_applications")
+        .delete()
+        .eq('id', draftId)
+        .eq('user_id', session?.user?.id)
+        .eq('is_draft', true);
+
+      if (deleteError) throw deleteError;
+
+      toast.success("Draft application deleted successfully");
+      refetchApplications();
+    } catch (error: any) {
+      console.error("Error deleting draft:", error);
+      toast.error(error.message || "Failed to delete draft application");
+    }
+  };
+
   return (
     <div className="mt-8">
       {draftApplications.length > 0 && (
@@ -51,14 +80,23 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
                     Last updated: {new Date(draft.updated_at).toLocaleDateString()}
                   </p>
                 </div>
-                <Button 
-                  onClick={() => navigate(`/apply?draft=${draft.id}`)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <FileEdit className="h-4 w-4" />
-                  Continue Application
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => navigate(`/apply?draft=${draft.id}`)}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <FileEdit className="h-4 w-4" />
+                    Continue
+                  </Button>
+                  <Button
+                    onClick={() => handleDeleteDraft(draft.id)}
+                    variant="destructive"
+                    size="icon"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
