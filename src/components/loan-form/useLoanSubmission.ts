@@ -14,7 +14,6 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
   const handleSubmit = async () => {
     if (isSubmitting) return null;
     
-    setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -88,37 +87,13 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
         result = data;
       }
 
-      // Get the latest terms version
-      const { data: latestTerms, error: termsError } = await supabase
-        .from("terms_versions")
-        .select("id")
-        .order('effective_date', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (termsError) throw termsError;
-
-      // Record terms acceptance
-      const { error: acceptanceError } = await supabase
-        .from("terms_acceptances")
-        .insert({
-          user_id: user.id,
-          loan_application_id: result.id,
-          terms_version_id: latestTerms.id,
-        });
-
-      if (acceptanceError) throw acceptanceError;
-
       console.log("Application submitted successfully:", result.id);
-      toast.success("Application submitted successfully!");
       navigate("/dashboard");
       return result.id;
     } catch (error: any) {
       console.error("Error submitting application:", error);
       toast.error(error.message || "Failed to submit application");
       return null;
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

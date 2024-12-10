@@ -18,8 +18,10 @@ export const useFormSteps = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submission started");
     
     if (!validateStep(currentStep, formData)) {
+      console.log("Validation failed for current step");
       return;
     }
 
@@ -47,19 +49,33 @@ export const useFormSteps = () => {
 
     // Validate all steps before final submission
     if (!validateForm(formData)) {
+      toast.error("Please ensure all required fields are filled correctly");
       return;
     }
 
-    // Record terms acceptance
-    const termsRecorded = await recordTermsAcceptance();
-    if (!termsRecorded) {
-      return;
-    }
+    console.log("Starting final submission process");
+    setIsSubmitting(true);
 
-    // Submit the application
-    const applicationId = await submitApplication();
-    if (applicationId) {
-      // Application submitted successfully
+    try {
+      // Record terms acceptance
+      const termsRecorded = await recordTermsAcceptance();
+      if (!termsRecorded) {
+        toast.error("Failed to record terms acceptance");
+        return;
+      }
+
+      // Submit the application
+      const applicationId = await submitApplication();
+      if (applicationId) {
+        console.log("Application submitted successfully:", applicationId);
+        toast.success("Application submitted successfully!");
+      } else {
+        toast.error("Failed to submit application");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error("An error occurred while submitting the application");
+    } finally {
       setIsSubmitting(false);
     }
   };
