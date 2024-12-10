@@ -448,7 +448,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_draft_application: {
+        Args: {
+          draft_id: string
+          user_id_input: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       file_category: "policy" | "form" | "guide" | "other"

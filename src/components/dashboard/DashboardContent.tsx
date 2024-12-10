@@ -57,7 +57,7 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
       const { data: result, error: rpcError } = await supabase
         .rpc('delete_draft_application', {
           draft_id: draftId,
-          user_id_input: session?.user?.id
+          user_id_input: session?.user?.id || ''
         });
 
       if (rpcError) {
