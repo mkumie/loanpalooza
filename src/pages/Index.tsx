@@ -15,8 +15,8 @@ const Index = () => {
   const navigate = useNavigate();
   const session = useSession();
   const [loanAmount, setLoanAmount] = useState<string>("");
-  const [loanTerm, setLoanTerm] = useState<string>("");
-  const [monthlyPayment, setMonthlyPayment] = useState<number | null>(null);
+  const [loanTermYears, setLoanTermYears] = useState<string>("");
+  const [fortnightlyPayment, setFortnightlyPayment] = useState<number | null>(null);
 
   const { data: downloadableFiles } = useQuery({
     queryKey: ["downloadableFiles"],
@@ -42,14 +42,15 @@ const Index = () => {
 
   const calculateFortnightlyPayment = () => {
     const principal = parseFloat(loanAmount);
-    const fortnights = parseFloat(loanTerm) * 26; // 26 fortnights in a year
+    const years = parseFloat(loanTermYears);
+    const fortnights = years * 26; // 26 fortnights in a year
     const fortnightlyInterestRate = 0.15 / 26; // 15% annual interest rate divided by 26 fortnights
 
     if (principal && fortnights) {
       const payment =
         (principal * fortnightlyInterestRate * Math.pow(1 + fortnightlyInterestRate, fortnights)) /
         (Math.pow(1 + fortnightlyInterestRate, fortnights) - 1);
-      setMonthlyPayment(payment);
+      setFortnightlyPayment(payment);
     }
   };
 
@@ -122,7 +123,7 @@ const Index = () => {
           <Card className="p-6 max-w-md mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <Calculator className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">Loan Calculator</h2>
+              <h2 className="text-xl font-semibold">Fortnightly Loan Calculator</h2>
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -136,37 +137,39 @@ const Index = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="loanTerm">Loan Term (Years)</Label>
+                <Label htmlFor="loanTermYears">Loan Term (Years)</Label>
                 <Input
-                  id="loanTerm"
+                  id="loanTermYears"
                   type="number"
-                  value={loanTerm}
-                  onChange={(e) => setLoanTerm(e.target.value)}
-                  placeholder="Enter loan term"
+                  value={loanTermYears}
+                  onChange={(e) => setLoanTermYears(e.target.value)}
+                  placeholder="Enter loan term in years"
                 />
               </div>
               <Button
                 onClick={calculateFortnightlyPayment}
                 className="w-full"
-                disabled={!loanAmount || !loanTerm}
+                disabled={!loanAmount || !loanTermYears}
               >
-                Calculate Payment
+                Calculate Fortnightly Payment
               </Button>
-              {monthlyPayment && (
+              {fortnightlyPayment && (
                 <div className="mt-4 p-4 bg-primary/10 rounded-lg">
                   <p className="text-sm text-gray-600">Estimated Fortnightly Payment</p>
                   <p className="text-2xl font-bold text-primary">
-                    K {monthlyPayment.toFixed(2)}
+                    K {fortnightlyPayment.toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
                     *Based on 15% annual interest rate
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Paid every 2 weeks ({Math.round(parseFloat(loanTermYears) * 26)} payments)
                   </p>
                 </div>
               )}
             </div>
           </Card>
 
-          {/* Downloadable Files Section */}
           {downloadableFiles && downloadableFiles.length > 0 && (
             <Card className="p-6">
               <div className="flex items-center gap-2 mb-4">

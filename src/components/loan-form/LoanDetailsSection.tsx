@@ -37,7 +37,12 @@ export const LoanDetailsSection = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="repaymentPeriod">Repayment Period (Months)</Label>
+          <Label htmlFor="repaymentPeriod">
+            Repayment Period (Years)
+            <span className="block text-sm text-gray-500">
+              Payments will be made fortnightly
+            </span>
+          </Label>
           <Input
             id="repaymentPeriod"
             type="number"
@@ -46,6 +51,11 @@ export const LoanDetailsSection = ({
               setFormData({ ...formData, repaymentPeriod: e.target.value })
             }
           />
+          {formData.repaymentPeriod && (
+            <p className="text-sm text-gray-500">
+              Total of {Math.round(parseFloat(formData.repaymentPeriod) * 26)} fortnightly payments
+            </p>
+          )}
         </div>
 
         <div className="col-span-2 space-y-2">
