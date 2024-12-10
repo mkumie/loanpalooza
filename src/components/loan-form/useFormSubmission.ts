@@ -2,12 +2,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
+import { LoanStatus } from "@/types/loan";
 
 const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: string, isDraft: boolean = true) => {
+  const status: LoanStatus = isDraft ? "draft" : "pending";
+  
   return {
     user_id: userId,
     is_draft: isDraft,
-    status: isDraft ? "draft" : "pending",
+    status,
     first_name: formData.firstName,
     surname: formData.surname,
     date_of_birth: formData.dateOfBirth,
@@ -19,13 +22,13 @@ const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: stri
     employment_status: formData.employmentStatus,
     employer_name: formData.employerName,
     occupation: formData.occupation,
-    monthly_income: parseFloat(formData.monthlyIncome),
+    monthly_income: parseFloat(formData.monthlyIncome || '0'),
     employment_length: formData.employmentLength,
     work_address: formData.workAddress,
     work_phone: formData.workPhone,
-    loan_amount: parseFloat(formData.loanAmount),
+    loan_amount: parseFloat(formData.loanAmount || '0'),
     loan_purpose: formData.loanPurpose,
-    repayment_period: parseInt(formData.repaymentPeriod),
+    repayment_period: parseInt(formData.repaymentPeriod || '0'),
     existing_loans: formData.existingLoans,
     existing_loan_details: formData.existingLoanDetails,
     reference_full_name: formData.referenceFullName,
