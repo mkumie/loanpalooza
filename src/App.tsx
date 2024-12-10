@@ -1,25 +1,44 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { SessionContextProvider, useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import { useSession } from "@supabase/auth-helpers-react";
 import { LoanApplicationForm } from "./components/LoanApplicationForm";
+import { toast } from "sonner";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const session = useSession();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Session check error:", error);
+        toast.error("Session expired. Please login again.");
+      }
+      
+      if (!currentSession) {
+        toast.error("Please login to continue");
+      }
+    };
+
+    checkSession();
+  }, []);
+
   if (!session) {
     return <Navigate to="/login" replace />;
   }
+
   return <>{children}</>;
 };
 
@@ -28,6 +47,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000, // 1 minute
+      retry: false, // Disable retries for failed queries
     },
   },
 });
@@ -35,7 +55,10 @@ const queryClient = new QueryClient({
 // App component as a proper function component
 const App: React.FC = () => {
   return (
-    <SessionContextProvider supabaseClient={supabase}>
+    <SessionContextProvider 
+      supabaseClient={supabase}
+      initialSession={null} // Explicitly set to null to prevent initial session issues
+    >
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <div className="min-h-screen">
