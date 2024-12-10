@@ -2,6 +2,7 @@ export type LoanStatus = "pending" | "approved" | "rejected" | "draft";
 
 export interface LoanApplication {
   id: string;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
   first_name: string;
@@ -37,4 +38,5 @@ export interface LoanApplication {
   status: LoanStatus;
   admin_comments: string | null;
   is_draft: boolean | null;
+  reference_number: string | null;
 }
