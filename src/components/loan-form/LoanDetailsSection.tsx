@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface LoanDetailsSectionProps {
   formData: {
@@ -107,13 +108,20 @@ export const LoanDetailsSection = ({
           </div>
 
           {formData.existingLoans && (
-            <div className="space-y-2">
+            <div className="space-y-2 bg-gray-50 p-4 rounded-lg border">
               <Label htmlFor="existingLoanDetails">
-                Please provide details of existing loans
+                Please provide details of your existing loans
+                <span className="block text-sm text-gray-500">
+                  Include: Lender name, loan amount, remaining balance, and monthly payments
+                </span>
               </Label>
-              <Input
+              <Textarea
                 id="existingLoanDetails"
+                placeholder="Example:
+1. ABC Bank - K50,000 loan, K30,000 remaining, K2,500 monthly
+2. XYZ Credit - K20,000 loan, K15,000 remaining, K1,000 monthly"
                 value={formData.existingLoanDetails}
+                className="min-h-[120px]"
                 onChange={(e) =>
                   setFormData({
                     ...formData,
