@@ -2,11 +2,13 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export const useLoanSubmission = (formData: LoanApplicationData) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draft');
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -19,6 +21,22 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
     }
 
     try {
+      // If this is a draft submission, delete the draft first
+      if (draftId) {
+        const { error: deleteError } = await supabase
+          .from("loan_applications")
+          .delete()
+          .eq('id', draftId)
+          .eq('user_id', user.id)
+          .eq('is_draft', true);
+
+        if (deleteError) {
+          console.error("Error deleting draft:", deleteError);
+          throw deleteError;
+        }
+      }
+
+      // Submit the new application
       const { data, error } = await supabase
         .from("loan_applications")
         .insert({
