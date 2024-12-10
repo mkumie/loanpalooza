@@ -9,13 +9,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { LoanApplication } from "@/types/loan";
+import { useSession } from "@supabase/auth-helpers-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const session = useSession();
   const [userEmail, setUserEmail] = useState<string>();
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Fetch loan applications
   const { data: applications, refetch: refetchApplications } = useQuery({
     queryKey: ["loan-applications"],
     queryFn: async () => {
@@ -27,25 +30,26 @@ const Dashboard = () => {
       if (error) throw error;
       return data as LoanApplication[];
     },
+    enabled: !!session, // Only run query if session exists
   });
 
   useEffect(() => {
-    const getProfile = async () => {
+    const checkSession = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
+        if (!session) {
           navigate("/login");
           return;
         }
 
-        setUserEmail(user.email);
+        setUserEmail(session.user.email);
 
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from("profiles")
           .select("is_admin")
-          .eq("id", user.id)
+          .eq("id", session.user.id)
           .single();
 
+        if (error) throw error;
         setIsAdmin(profile?.is_admin || false);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -54,11 +58,12 @@ const Dashboard = () => {
           title: "Error",
           description: "Failed to load profile information",
         });
+        navigate("/login");
       }
     };
 
-    getProfile();
-  }, [navigate, toast]);
+    checkSession();
+  }, [session, navigate, toast]);
 
   const handleSignOut = async () => {
     try {
@@ -73,6 +78,10 @@ const Dashboard = () => {
       });
     }
   };
+
+  if (!session) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <div className="min-h-screen bg-background">
