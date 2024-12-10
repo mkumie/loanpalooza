@@ -11,18 +11,21 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error signing out:", error);
-        throw error;
+      if (!session) {
+        // If there's no session, just redirect to login
+        navigate("/login");
+        return;
       }
+
+      // Attempt to sign out
+      await supabase.auth.signOut();
+      
+      // Always navigate to login after attempting sign out
       navigate("/login");
     } catch (error) {
       console.error("Error during sign out:", error);
-      // Still navigate to login page even if there's an error
-      // as the session might be invalid anyway
+      // Navigate to login even if there's an error
       navigate("/login");
-      toast.error("There was an issue signing out. Please try again.");
     }
   };
 
