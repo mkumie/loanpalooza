@@ -251,6 +251,72 @@ export type Database = {
         }
         Relationships: []
       }
+      terms_acceptances: {
+        Row: {
+          accepted_at: string | null
+          id: string
+          ip_address: string | null
+          loan_application_id: string | null
+          terms_version_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          id?: string
+          ip_address?: string | null
+          loan_application_id?: string | null
+          terms_version_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          id?: string
+          ip_address?: string | null
+          loan_application_id?: string | null
+          terms_version_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terms_acceptances_loan_application_id_fkey"
+            columns: ["loan_application_id"]
+            isOneToOne: true
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "terms_acceptances_terms_version_id_fkey"
+            columns: ["terms_version_id"]
+            isOneToOne: false
+            referencedRelation: "terms_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      terms_versions: {
+        Row: {
+          content: string
+          created_at: string | null
+          effective_date: string | null
+          id: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          version?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { FormHeader } from "./loan-form/FormHeader";
 import { PersonalDetailsSection } from "./loan-form/PersonalDetailsSection";
 import { EmploymentDetailsSection } from "./loan-form/EmploymentDetailsSection";
@@ -9,24 +9,26 @@ import { ProgressStepper } from "./loan-form/ProgressStepper";
 import { FormNavigation } from "./loan-form/FormNavigation";
 import { Navigation } from "./Navigation";
 import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanApplicationContext";
-import { validateCurrentStep, validateAllSteps, showValidationErrors } from "@/utils/loanFormValidation";
 import { DocumentUpload } from "./loan/DocumentUpload";
 import { TermsAndConditions } from "./loan-form/TermsAndConditions";
-import { useFormSubmission } from "./loan-form/useFormSubmission";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useFormValidation } from "./loan-form/useFormValidation";
+import { useLoanSubmission } from "./loan-form/useLoanSubmission";
+import { useTermsAcceptance } from "./loan-form/useTermsAcceptance";
 
 const LoanApplicationFormContent = () => {
-  const { formData, setFormData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
-  const handleSubmit = useFormSubmission(formData, setIsSubmitting);
+  const { formData, setFormData, currentStep, setCurrentStep } = useLoanApplication();
   const [searchParams] = useSearchParams();
-  const [validationErrors, setValidationErrors] = React.useState<Record<string, string>>({});
   const [areDocumentsValid, setAreDocumentsValid] = React.useState(false);
-  const [termsAgreed, setTermsAgreed] = React.useState(false);
   const draftId = searchParams.get('draft');
 
-  useEffect(() => {
+  const { validationErrors, validateStep, validateForm } = useFormValidation();
+  const { isSubmitting, setIsSubmitting, handleSubmit } = useLoanSubmission(formData);
+  const { termsAgreed, setTermsAgreed, recordTermsAcceptance } = useTermsAcceptance(draftId);
+
+  React.useEffect(() => {
     const loadDraftData = async () => {
       if (!draftId) return;
 
@@ -84,11 +86,8 @@ const LoanApplicationFormContent = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationErrors({});
     
-    const errors = validateCurrentStep(currentStep, formData);
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
+    if (!validateStep(currentStep, formData)) {
       return;
     }
 
@@ -115,15 +114,21 @@ const LoanApplicationFormContent = () => {
     }
 
     // Validate all steps before final submission
-    const missingRequirements = validateAllSteps(formData);
-    if (missingRequirements.length > 0) {
-      showValidationErrors(missingRequirements);
+    if (!validateForm(formData)) {
       return;
     }
 
+    // Record terms acceptance
+    const termsRecorded = await recordTermsAcceptance();
+    if (!termsRecorded) {
+      return;
+    }
+
+    // Submit the application
     const applicationId = await handleSubmit();
     if (applicationId) {
-      // You can use the applicationId here if needed for documents
+      // Application submitted successfully
+      setIsSubmitting(false);
     }
   };
 
