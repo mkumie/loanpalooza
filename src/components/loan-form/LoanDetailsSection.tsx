@@ -61,7 +61,7 @@ export const LoanDetailsSection = ({
         .map(loan => 
           `YES Finance - Reference: ${loan.reference_number}\n` +
           `Amount: K${loan.loan_amount.toLocaleString()}\n` +
-          `Purpose: ${loan.purpose}\n` +
+          `Purpose: ${loan.loan_purpose}\n` +
           `Status: ${loan.status}\n`
         )
         .join('\n');
