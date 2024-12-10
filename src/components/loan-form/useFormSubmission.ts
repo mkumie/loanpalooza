@@ -27,37 +27,10 @@ export const useFormSubmission = (
       setIsSubmitting(true);
       
       const { data: { id }, error } = await supabase.from("loan_applications").insert({
+        ...formData,
         user_id: session.user.id,
-        first_name: formData.firstName,
-        surname: formData.surname,
-        date_of_birth: formData.dateOfBirth,
-        gender: formData.gender,
-        marital_status: formData.maritalStatus,
-        district: formData.district,
-        village: formData.village,
-        home_province: formData.homeProvince,
-        employment_status: formData.employmentStatus,
-        employer_name: formData.employerName,
-        occupation: formData.occupation,
-        monthly_income: parseFloat(formData.monthlyIncome),
-        employment_length: formData.employmentLength,
-        work_address: formData.workAddress,
-        work_phone: formData.workPhone,
-        loan_amount: parseFloat(formData.loanAmount),
-        loan_purpose: formData.loanPurpose,
-        repayment_period: parseInt(formData.repaymentPeriod),
-        existing_loans: formData.existingLoans,
-        existing_loan_details: formData.existingLoanDetails,
-        reference_full_name: formData.referenceFullName,
-        reference_relationship: formData.referenceRelationship,
-        reference_address: formData.referenceAddress,
-        reference_phone: formData.referencePhone,
-        reference_occupation: formData.referenceOccupation,
-        bank_name: formData.bankName,
-        account_number: formData.accountNumber,
-        account_type: formData.accountType,
-        branch_name: formData.branchName,
-        account_holder_name: formData.accountHolderName,
+        is_draft: false,
+        status: 'pending'
       }).select('id').single();
 
       if (error) throw error;

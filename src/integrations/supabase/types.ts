@@ -71,6 +71,7 @@ export type Database = {
           gender: string
           home_province: string
           id: string
+          is_draft: boolean | null
           loan_amount: number
           loan_purpose: string
           marital_status: string
@@ -110,6 +111,7 @@ export type Database = {
           gender: string
           home_province: string
           id?: string
+          is_draft?: boolean | null
           loan_amount: number
           loan_purpose: string
           marital_status: string
@@ -149,6 +151,7 @@ export type Database = {
           gender?: string
           home_province?: string
           id?: string
+          is_draft?: boolean | null
           loan_amount?: number
           loan_purpose?: string
           marital_status?: string
@@ -257,7 +260,7 @@ export type Database = {
     }
     Enums: {
       file_category: "policy" | "form" | "guide" | "other"
-      loan_status: "pending" | "approved" | "rejected"
+      loan_status: "pending" | "approved" | "rejected" | "draft"
     }
     CompositeTypes: {
       [_ in never]: never
