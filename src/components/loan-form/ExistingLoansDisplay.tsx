@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface ExistingLoansDisplayProps {
   existingLoanDetails: string;
@@ -12,7 +14,7 @@ interface ExistingLoansDisplayProps {
 export const ExistingLoansDisplay = ({ existingLoanDetails, setFormData }: ExistingLoansDisplayProps) => {
   const session = useSession();
 
-  const { data: existingLoans } = useQuery({
+  const { data: existingLoans, isLoading } = useQuery({
     queryKey: ['existingLoans', session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return [];
@@ -30,37 +32,45 @@ export const ExistingLoansDisplay = ({ existingLoanDetails, setFormData }: Exist
     enabled: !!session?.user?.id,
   });
 
-  const formattedLoans = existingLoans?.map(loan => 
-    `YES Finance - Reference: ${loan.reference_number}\n` +
-    `Amount: K${loan.loan_amount.toLocaleString()}\n` +
-    `Purpose: ${loan.loan_purpose}\n` +
-    `Status: ${loan.status}\n`
-  ).join('\n');
+  const formattedLoans = existingLoans && existingLoans.length > 0
+    ? existingLoans.map(loan => 
+        `YES Finance - Reference: ${loan.reference_number}\n` +
+        `Amount: K${loan.loan_amount.toLocaleString()}\n` +
+        `Purpose: ${loan.loan_purpose}\n` +
+        `Status: ${loan.status}\n`
+      ).join('\n')
+    : "No active YES Finance loans found.";
 
   return (
-    <div className="space-y-2 bg-gray-50 p-4 rounded-lg border">
-      <Label htmlFor="existingLoanDetails">
-        Your existing loans
-        <span className="block text-sm text-gray-500">
-          Your YES Finance loans are automatically listed above. Please add details of any other loans below:
-        </span>
-      </Label>
-      <Textarea
-        id="existingLoanDetails"
-        placeholder="For other loans, please include:
+    <div className="space-y-4">
+      <Alert>
+        <InfoIcon className="h-4 w-4" />
+        <AlertDescription>
+          Your YES Finance loans are automatically listed below. Please add details of any other loans in the text area.
+        </AlertDescription>
+      </Alert>
+      
+      <div className="bg-gray-50 p-4 rounded-lg border">
+        <Label htmlFor="existingLoanDetails">
+          Your existing loans
+        </Label>
+        <Textarea
+          id="existingLoanDetails"
+          placeholder="For other loans, please include:
 1. Lender name
 2. Loan amount
 3. Remaining balance
 4. Monthly payments"
-        value={formattedLoans + (existingLoanDetails ? '\n\nOther Loans:\n' + existingLoanDetails : '')}
-        className="min-h-[120px]"
-        onChange={(e) =>
-          setFormData((prev: any) => ({
-            ...prev,
-            existingLoanDetails: e.target.value.replace(formattedLoans, '').replace('\n\nOther Loans:\n', ''),
-          }))
-        }
-      />
+          value={formattedLoans + (existingLoanDetails ? '\n\nOther Loans:\n' + existingLoanDetails : '')}
+          className="min-h-[120px] mt-2"
+          onChange={(e) =>
+            setFormData((prev: any) => ({
+              ...prev,
+              existingLoanDetails: e.target.value.replace(formattedLoans, '').replace('\n\nOther Loans:\n', ''),
+            }))
+          }
+        />
+      </div>
     </div>
   );
 };
