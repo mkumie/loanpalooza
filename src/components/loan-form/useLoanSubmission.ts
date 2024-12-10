@@ -21,35 +21,10 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
     }
 
     try {
-      // If this is a draft submission, delete related records first
-      if (draftId) {
-        // First delete any terms acceptances for this draft
-        const { error: termsDeleteError } = await supabase
-          .from("terms_acceptances")
-          .delete()
-          .eq('loan_application_id', draftId);
-
-        if (termsDeleteError) {
-          console.error("Error deleting terms acceptances:", termsDeleteError);
-          throw termsDeleteError;
-        }
-
-        // Then delete the draft application
-        const { error: deleteError } = await supabase
-          .from("loan_applications")
-          .delete()
-          .eq('id', draftId)
-          .eq('user_id', user.id)
-          .eq('is_draft', true);
-
-        if (deleteError) {
-          console.error("Error deleting draft:", deleteError);
-          throw deleteError;
-        }
-      }
-
-      // Submit the new application
-      const { data, error } = await supabase
+      console.log("Starting application submission process");
+      
+      // Submit the new application first
+      const { data: newApplication, error: insertError } = await supabase
         .from("loan_applications")
         .insert({
           user_id: user.id,
@@ -89,11 +64,31 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (insertError) throw insertError;
+      console.log("New application created successfully:", newApplication.id);
+
+      // If this was from a draft, delete it after successful submission
+      if (draftId) {
+        console.log("Attempting to delete draft:", draftId);
+        const { error: deleteError } = await supabase
+          .from("loan_applications")
+          .delete()
+          .eq('id', draftId)
+          .eq('user_id', user.id)
+          .eq('is_draft', true);
+
+        if (deleteError) {
+          console.error("Error deleting draft:", deleteError);
+          // Don't throw here, as the main application was submitted successfully
+          toast.error("Note: Could not delete draft application");
+        } else {
+          console.log("Draft deleted successfully");
+        }
+      }
 
       toast.success("Application submitted successfully!");
       navigate("/dashboard");
-      return data.id;
+      return newApplication.id;
     } catch (error: any) {
       console.error("Error submitting application:", error);
       toast.error(error.message || "Failed to submit application");
