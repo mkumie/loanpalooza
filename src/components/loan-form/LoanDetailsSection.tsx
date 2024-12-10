@@ -2,6 +2,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface LoanDetailsSectionProps {
   formData: {
@@ -13,6 +20,19 @@ interface LoanDetailsSectionProps {
   };
   setFormData: (data: any) => void;
 }
+
+const loanPurposes = [
+  "Business Startup",
+  "Business Expansion",
+  "Equipment Purchase",
+  "Working Capital",
+  "Inventory Finance",
+  "Debt Consolidation",
+  "Property Purchase",
+  "Vehicle Finance",
+  "Education",
+  "Personal Use",
+];
 
 export const LoanDetailsSection = ({
   formData,
@@ -60,13 +80,23 @@ export const LoanDetailsSection = ({
 
         <div className="col-span-2 space-y-2">
           <Label htmlFor="loanPurpose">Purpose of Loan</Label>
-          <Input
-            id="loanPurpose"
+          <Select
             value={formData.loanPurpose}
-            onChange={(e) =>
-              setFormData({ ...formData, loanPurpose: e.target.value })
+            onValueChange={(value) =>
+              setFormData({ ...formData, loanPurpose: value })
             }
-          />
+          >
+            <SelectTrigger id="loanPurpose">
+              <SelectValue placeholder="Select the purpose of your loan" />
+            </SelectTrigger>
+            <SelectContent>
+              {loanPurposes.map((purpose) => (
+                <SelectItem key={purpose} value={purpose}>
+                  {purpose}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="col-span-2 space-y-4">
