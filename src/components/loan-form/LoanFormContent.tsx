@@ -10,11 +10,13 @@ import { FormNavigation } from "./FormNavigation";
 import { DocumentUpload } from "../loan/DocumentUpload";
 import { TermsAndConditions } from "./TermsAndConditions";
 import { useFormSteps } from "./useFormSteps";
+import { useLoanApplication } from "@/contexts/LoanApplicationContext";
 
 export const LoanFormContent = () => {
   const {
     currentStep,
     formData,
+    setFormData,
     areDocumentsValid,
     setAreDocumentsValid,
     termsAgreed,
