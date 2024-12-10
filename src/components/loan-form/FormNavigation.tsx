@@ -72,12 +72,18 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           .single();
       } else {
         // Check for existing draft
-        const { data: existingDraft } = await supabase
+        const { data: existingDraft, error: existingError } = await supabase
           .from("loan_applications")
           .select("id")
           .eq("user_id", session.user.id)
           .eq("is_draft", true)
-          .single();
+          .maybeSingle(); // Changed from single() to maybeSingle()
+
+        if (existingError && existingError.code !== 'PGRST116') { // Ignore "no rows returned" error
+          console.error("Error checking existing draft:", existingError);
+          toast.error("Failed to save draft");
+          return;
+        }
 
         if (existingDraft) {
           // Update existing draft
@@ -144,7 +150,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
         >
           {isSubmitting 
             ? "Submitting..." 
-            : currentStep === 6
+            : currentStep === 7
               ? "Submit Application" 
               : "Next"
           }
