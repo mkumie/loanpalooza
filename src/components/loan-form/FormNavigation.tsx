@@ -80,14 +80,17 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
 
       if (result.error) throw result.error;
 
-      toast.success("Draft saved successfully");
+      toast.success("Progress saved successfully");
       
       if (!draftId && result.data?.id) {
         navigate(`/apply?draft=${result.data.id}`, { replace: true });
       }
+
+      return result.data?.id;
     } catch (error: any) {
-      console.error("Error saving draft:", error);
-      toast.error(error.message || "Failed to save draft");
+      console.error("Error saving progress:", error);
+      toast.error(error.message || "Failed to save progress");
+      return null;
     }
   };
 
@@ -95,21 +98,18 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     setCurrentStep(Math.max(1, currentStep - 1));
   };
 
-  const handleNext = async () => {
-    // Save progress before moving to next step
-    await handleSaveDraft();
+  const handleSaveAndContinue = async () => {
+    const savedId = await handleSaveDraft();
     
-    // Only proceed to next step if we're not on document upload or terms
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
-    } else if (currentStep === 5) {
+    if (currentStep === 5) {
       // For bank details step, ensure we have an application ID before proceeding
-      const applicationId = searchParams.get('draft');
-      if (!applicationId) {
+      if (!draftId && !savedId) {
         toast.error("Unable to proceed - application ID not found");
         return;
       }
       setCurrentStep(6);
+    } else if (currentStep < 7) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -126,34 +126,24 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
         </Button>
       )}
       <div className="flex-1" />
-      <div className="flex gap-4">
+      {currentStep === 7 ? (
         <Button 
-          type="button" 
-          variant="outline"
-          onClick={handleSaveDraft}
-          disabled={isSubmitting}
+          type="submit" 
+          className="bg-primary hover:bg-primary-600"
+          disabled={isSubmitting || isSubmitDisabled}
         >
-          Save Draft
+          {isSubmitting ? "Submitting..." : "Submit Application"}
         </Button>
-        {currentStep === 7 ? (
-          <Button 
-            type="submit" 
-            className="bg-primary hover:bg-primary-600"
-            disabled={isSubmitting || isSubmitDisabled}
-          >
-            {isSubmitting ? "Submitting..." : "Submit Application"}
-          </Button>
-        ) : (
-          <Button 
-            type="button"
-            onClick={handleNext}
-            className="bg-primary hover:bg-primary-600"
-            disabled={isSubmitting || isSubmitDisabled}
-          >
-            {isSubmitting ? "Saving..." : "Next"}
-          </Button>
-        )}
-      </div>
+      ) : (
+        <Button 
+          type="button"
+          onClick={handleSaveAndContinue}
+          className="bg-primary hover:bg-primary-600"
+          disabled={isSubmitting || isSubmitDisabled}
+        >
+          {isSubmitting ? "Saving..." : "Save and Continue"}
+        </Button>
+      )}
     </div>
   );
 };
