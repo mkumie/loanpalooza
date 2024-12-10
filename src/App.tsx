@@ -35,49 +35,47 @@ const queryClient = new QueryClient({
 // App component as a proper function component
 const App: React.FC = () => {
   return (
-    <React.StrictMode>
+    <SessionContextProvider supabaseClient={supabase}>
       <QueryClientProvider client={queryClient}>
-        <SessionContextProvider supabaseClient={supabase}>
-          <TooltipProvider>
-            <div className="min-h-screen">
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <Profile />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/apply"
-                    element={
-                      <ProtectedRoute>
-                        <LoanApplicationForm />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Routes>
-              </BrowserRouter>
-            </div>
-          </TooltipProvider>
-        </SessionContextProvider>
+        <TooltipProvider>
+          <div className="min-h-screen">
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/apply"
+                  element={
+                    <ProtectedRoute>
+                      <LoanApplicationForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </BrowserRouter>
+          </div>
+        </TooltipProvider>
       </QueryClientProvider>
-    </React.StrictMode>
+    </SessionContextProvider>
   );
 };
 

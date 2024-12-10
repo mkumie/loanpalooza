@@ -35,12 +35,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      try {
-        if (!session) {
-          navigate("/login");
-          return;
-        }
+      if (!session) {
+        navigate("/login");
+        return;
+      }
 
+      try {
         setUserEmail(session.user.email);
 
         const { data: profile, error } = await supabase
@@ -80,7 +80,7 @@ const Dashboard = () => {
   };
 
   if (!session) {
-    return null; // Or a loading spinner
+    return null;
   }
 
   return (
