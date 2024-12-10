@@ -2,12 +2,6 @@ import { RequiredDocument } from "@/types/documents";
 
 export const REQUIRED_DOCUMENTS: RequiredDocument[] = [
   {
-    type: "loan_application",
-    label: "Personal Loan Application Form",
-    description: "Fully completed form",
-    required: true
-  },
-  {
     type: "pay_slips",
     label: "Pay Slips",
     description: "Provide 3 x latest Pay Slips",
