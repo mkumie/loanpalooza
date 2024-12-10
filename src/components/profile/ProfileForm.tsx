@@ -6,12 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { User, Save } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ProfileFormData {
   first_name: string;
   surname: string;
   phone_number: string;
   address: string;
+  date_of_birth: string;
+  gender: string;
 }
 
 interface ProfileFormProps {
@@ -28,6 +31,8 @@ export const ProfileForm = ({ profile }: ProfileFormProps) => {
       surname: profile?.surname || "",
       phone_number: profile?.phone_number || "",
       address: profile?.address || "",
+      date_of_birth: profile?.date_of_birth || "",
+      gender: profile?.gender || "",
     },
   });
 
@@ -84,6 +89,39 @@ export const ProfileForm = ({ profile }: ProfileFormProps) => {
           />
           {errors.surname && (
             <p className="text-sm text-destructive">{errors.surname.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="date_of_birth">Date of Birth</Label>
+          <Input
+            id="date_of_birth"
+            type="date"
+            {...register("date_of_birth", { required: "Date of birth is required" })}
+          />
+          {errors.date_of_birth && (
+            <p className="text-sm text-destructive">{errors.date_of_birth.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label>Gender</Label>
+          <RadioGroup
+            {...register("gender", { required: "Gender is required" })}
+            className="flex space-x-4"
+            defaultValue={profile?.gender || ""}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="male" id="male" />
+              <Label htmlFor="male">Male</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="female" id="female" />
+              <Label htmlFor="female">Female</Label>
+            </div>
+          </RadioGroup>
+          {errors.gender && (
+            <p className="text-sm text-destructive">{errors.gender.message}</p>
           )}
         </div>
 
