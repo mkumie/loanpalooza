@@ -103,8 +103,7 @@ export const DownloadableFiles = () => {
             </Button>
           </div>
         </Card>
-      </Card>
-    ))}
+      ))}
     </div>
   );
 };
