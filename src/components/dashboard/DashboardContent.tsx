@@ -33,12 +33,26 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
   const navigate = useNavigate();
 
   const { data: applications, refetch: refetchApplications } = useQuery({
-    queryKey: ["loan-applications"],
+    queryKey: ["loan-applications", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return [];
+      
+      // For admin users, fetch all applications
+      if (isAdmin) {
+        const { data, error } = await supabase
+          .from("loan_applications")
+          .select("*")
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return data as LoanApplication[];
+      }
+      
+      // For regular users, fetch only their applications
       const { data, error } = await supabase
         .from("loan_applications")
         .select("*")
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -51,13 +65,17 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
 
   const handleDeleteDraft = async (draftId: string) => {
     try {
+      if (!session?.user?.id) {
+        toast.error("You must be logged in to delete drafts");
+        return;
+      }
+
       console.log("Attempting to delete draft:", draftId);
       
-      // Start a transaction using RPC to ensure atomic operations
       const { data: result, error: rpcError } = await supabase
         .rpc('delete_draft_application', {
           draft_id: draftId,
-          user_id_input: session?.user?.id || ''
+          user_id_input: session.user.id
         });
 
       if (rpcError) {
