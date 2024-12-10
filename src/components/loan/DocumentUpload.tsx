@@ -22,6 +22,10 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
   const { data: uploadedDocuments, refetch: refetchDocuments } = useQuery({
     queryKey: ["loanDocuments", applicationId],
     queryFn: async () => {
+      if (!applicationId) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from("loan_documents")
         .select("*")
@@ -30,6 +34,7 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
       if (error) throw error;
       return data;
     },
+    enabled: Boolean(applicationId), // Only run query if we have a valid applicationId
   });
 
   // Calculate document status
@@ -50,6 +55,15 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
   }, [areRequiredDocumentsUploaded, onValidationChange]);
 
   const handleUpload = async (file: File, documentType: DocumentType) => {
+    if (!applicationId) {
+      toast({
+        title: "Error",
+        description: "Invalid application ID",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
       // First insert the document metadata
