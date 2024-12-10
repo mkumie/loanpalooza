@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { REQUIRED_DOCUMENTS } from "@/constants/documentRequirements";
 import { DocumentChecklist } from "./DocumentChecklist";
 import { DocumentUploadForm } from "./DocumentUploadForm";
+import * as React from "react";
 
 interface DocumentUploadProps {
   applicationId: string;
