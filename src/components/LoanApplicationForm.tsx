@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { Navigation } from "./Navigation";
 import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanApplicationContext";
 import { validateCurrentStep, validateAllSteps, showValidationErrors } from "@/utils/loanFormValidation";
+import { DocumentUpload } from "./loan/DocumentUpload";
 
 const LoanApplicationFormContent = () => {
   const { formData, setFormData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
@@ -28,7 +29,8 @@ const LoanApplicationFormContent = () => {
       return;
     }
 
-    if (currentStep < 5) {
+    // If we're not on the final documents step, just move to next step
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
       return;
     }
@@ -53,7 +55,7 @@ const LoanApplicationFormContent = () => {
     try {
       setIsSubmitting(true);
       
-      const { error } = await supabase.from("loan_applications").insert({
+      const { data: { id }, error } = await supabase.from("loan_applications").insert({
         user_id: session.user.id,
         first_name: formData.firstName,
         surname: formData.surname,
@@ -85,7 +87,7 @@ const LoanApplicationFormContent = () => {
         account_type: formData.accountType,
         branch_name: formData.branchName,
         account_holder_name: formData.accountHolderName,
-      });
+      }).select('id').single();
 
       if (error) throw error;
 
@@ -94,7 +96,7 @@ const LoanApplicationFormContent = () => {
         description: "Your loan application has been submitted successfully!",
       });
 
-      navigate("/dashboard");
+      navigate(`/dashboard`);
     } catch (error) {
       console.error("Error submitting application:", error);
       toast({
@@ -120,6 +122,7 @@ const LoanApplicationFormContent = () => {
           {currentStep === 3 && <LoanDetailsSection formData={formData} setFormData={setFormData} />}
           {currentStep === 4 && <ReferenceDetailsSection formData={formData} setFormData={setFormData} />}
           {currentStep === 5 && <PaymentDetailsSection formData={formData} setFormData={setFormData} />}
+          {currentStep === 6 && <DocumentUpload applicationId={null} />}
         </div>
 
         <FormNavigation />
