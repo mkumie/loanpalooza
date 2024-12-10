@@ -2,77 +2,20 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Calculator, GraduationCap, Wallet, RefreshCw, Download } from "lucide-react";
 import { DocumentChecklist } from "@/components/DocumentChecklist";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { LoanCalculator } from "@/components/home/LoanCalculator";
+import { LoanFeatures } from "@/components/home/LoanFeatures";
+import { DownloadableFiles } from "@/components/home/DownloadableFiles";
 
 const Index = () => {
   const navigate = useNavigate();
   const session = useSession();
-  const [loanAmount, setLoanAmount] = useState<string>("");
-  const [loanTermYears, setLoanTermYears] = useState<string>("");
-  const [fortnightlyPayment, setFortnightlyPayment] = useState<number | null>(null);
-
-  const { data: downloadableFiles } = useQuery({
-    queryKey: ["downloadableFiles"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("downloadable_files")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const handleGetStarted = () => {
     if (session) {
       navigate("/apply");
     } else {
       navigate("/register");
-    }
-  };
-
-  const calculateFortnightlyPayment = () => {
-    const principal = parseFloat(loanAmount);
-    const years = parseFloat(loanTermYears);
-    const fortnights = years * 26; // 26 fortnights in a year
-    const fortnightlyInterestRate = 0.15 / 26; // 15% annual interest rate divided by 26 fortnights
-
-    if (principal && fortnights) {
-      const payment =
-        (principal * fortnightlyInterestRate * Math.pow(1 + fortnightlyInterestRate, fortnights)) /
-        (Math.pow(1 + fortnightlyInterestRate, fortnights) - 1);
-      setFortnightlyPayment(payment);
-    }
-  };
-
-  const handleDownload = async (filePath: string, fileName: string) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from("downloadable_files")
-        .download(filePath);
-
-      if (error) throw error;
-
-      // Create a download link
-      const url = URL.createObjectURL(data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download error:", error);
     }
   };
 
@@ -89,116 +32,9 @@ const Index = () => {
             We offer competitive rates, flexible fortnightly repayments, and a simple online application process.
           </p>
           
-          <div className="grid gap-6 md:grid-cols-3 max-w-3xl mx-auto py-8">
-            <Card className="p-6">
-              <div className="flex flex-col items-center space-y-3">
-                <Wallet className="h-10 w-10 text-primary" />
-                <h3 className="text-lg font-semibold">Personal Loans</h3>
-                <p className="text-gray-600 text-sm">
-                  Quick access to funds for your personal needs with flexible repayment options
-                </p>
-              </div>
-            </Card>
-            <Card className="p-6">
-              <div className="flex flex-col items-center space-y-3">
-                <GraduationCap className="h-10 w-10 text-primary" />
-                <h3 className="text-lg font-semibold">School Fee Loans</h3>
-                <p className="text-gray-600 text-sm">
-                  Invest in education with our dedicated school fee financing solutions
-                </p>
-              </div>
-            </Card>
-            <Card className="p-6">
-              <div className="flex flex-col items-center space-y-3">
-                <RefreshCw className="h-10 w-10 text-primary" />
-                <h3 className="text-lg font-semibold">Refinancing</h3>
-                <p className="text-gray-600 text-sm">
-                  Consolidate your existing loans with better terms and lower rates
-                </p>
-              </div>
-            </Card>
-          </div>
-
-          {/* Loan Calculator Section */}
-          <Card className="p-6 max-w-md mx-auto">
-            <div className="flex items-center gap-2 mb-4">
-              <Calculator className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">Fortnightly Loan Calculator</h2>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="loanAmount">Loan Amount (K)</Label>
-                <Input
-                  id="loanAmount"
-                  type="number"
-                  value={loanAmount}
-                  onChange={(e) => setLoanAmount(e.target.value)}
-                  placeholder="Enter loan amount"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="loanTermYears">Loan Term (Years)</Label>
-                <Input
-                  id="loanTermYears"
-                  type="number"
-                  value={loanTermYears}
-                  onChange={(e) => setLoanTermYears(e.target.value)}
-                  placeholder="Enter loan term in years"
-                />
-              </div>
-              <Button
-                onClick={calculateFortnightlyPayment}
-                className="w-full"
-                disabled={!loanAmount || !loanTermYears}
-              >
-                Calculate Fortnightly Payment
-              </Button>
-              {fortnightlyPayment && (
-                <div className="mt-4 p-4 bg-primary/10 rounded-lg">
-                  <p className="text-sm text-gray-600">Estimated Fortnightly Payment</p>
-                  <p className="text-2xl font-bold text-primary">
-                    K {fortnightlyPayment.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    *Based on 15% annual interest rate
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Paid every 2 weeks ({Math.round(parseFloat(loanTermYears) * 26)} payments)
-                  </p>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {downloadableFiles && downloadableFiles.length > 0 && (
-            <Card className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Download className="h-5 w-5 text-primary" />
-                <h2 className="text-xl font-semibold">Important Documents</h2>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {downloadableFiles.map((file) => (
-                  <Card key={file.id} className="p-4 hover:bg-gray-50">
-                    <div className="space-y-2">
-                      <h3 className="font-medium">{file.title}</h3>
-                      {file.description && (
-                        <p className="text-sm text-gray-600">{file.description}</p>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => handleDownload(file.file_path, file.file_name)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </Card>
-          )}
+          <LoanFeatures />
+          <LoanCalculator />
+          <DownloadableFiles />
 
           {/* Document Requirements Section */}
           <div className="py-8">
