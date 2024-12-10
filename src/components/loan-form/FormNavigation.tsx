@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { LoanStatus } from "@/types/loan";
+import { validateCurrentStep } from "@/utils/loanFormValidation";
 
 interface FormNavigationProps {
   isSubmitDisabled?: boolean;
@@ -21,6 +22,11 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
 
   const hasDataChanged = () => {
     return JSON.stringify(formData) !== JSON.stringify(previousFormData);
+  };
+
+  const isCurrentStepValid = () => {
+    const errors = validateCurrentStep(currentStep, formData);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSaveDraft = async () => {
@@ -152,7 +158,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           type="button"
           onClick={handleSaveAndContinue}
           className="bg-primary hover:bg-primary-600"
-          disabled={isSubmitting || isSubmitDisabled}
+          disabled={isSubmitting || isSubmitDisabled || (!hasDataChanged() && !isCurrentStepValid())}
         >
           {isSubmitting ? "Saving..." : hasDataChanged() ? "Save and Continue" : "Next"}
         </Button>
