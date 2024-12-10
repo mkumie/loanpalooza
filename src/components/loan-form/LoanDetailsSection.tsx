@@ -2,6 +2,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
   SelectContent,
@@ -10,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useEffect } from "react";
 
 interface LoanDetailsSectionProps {
   formData: {
@@ -32,6 +36,44 @@ export const LoanDetailsSection = ({
   formData,
   setFormData,
 }: LoanDetailsSectionProps) => {
+  const session = useSession();
+
+  const { data: existingLoans } = useQuery({
+    queryKey: ['existingLoans', session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return [];
+      const { data, error } = await supabase
+        .from('loan_applications')
+        .select('loan_amount, loan_purpose, created_at, reference_number, status')
+        .eq('user_id', session.user.id)
+        .not('status', 'eq', 'rejected')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session?.user?.id && formData.existingLoans,
+  });
+
+  useEffect(() => {
+    if (formData.existingLoans && existingLoans?.length) {
+      const existingLoansText = existingLoans
+        .map(loan => 
+          `YES Finance - Reference: ${loan.reference_number}\n` +
+          `Amount: K${loan.loan_amount.toLocaleString()}\n` +
+          `Purpose: ${loan.purpose}\n` +
+          `Status: ${loan.status}\n`
+        )
+        .join('\n');
+
+      setFormData(prev => ({
+        ...prev,
+        existingLoanDetails: existingLoansText + 
+          (prev.existingLoanDetails ? '\n\nOther Loans:\n' + prev.existingLoanDetails : '')
+      }));
+    }
+  }, [existingLoans, formData.existingLoans]);
+
   return (
     <Card>
       <CardHeader className="bg-primary text-white">
@@ -110,16 +152,18 @@ export const LoanDetailsSection = ({
           {formData.existingLoans && (
             <div className="space-y-2 bg-gray-50 p-4 rounded-lg border">
               <Label htmlFor="existingLoanDetails">
-                Please provide details of your existing loans
+                Your existing loans
                 <span className="block text-sm text-gray-500">
-                  Include: Lender name, loan amount, remaining balance, and monthly payments
+                  Your YES Finance loans are automatically listed above. Please add details of any other loans below:
                 </span>
               </Label>
               <Textarea
                 id="existingLoanDetails"
-                placeholder="Example:
-1. ABC Bank - K50,000 loan, K30,000 remaining, K2,500 monthly
-2. XYZ Credit - K20,000 loan, K15,000 remaining, K1,000 monthly"
+                placeholder="For other loans, please include:
+1. Lender name
+2. Loan amount
+3. Remaining balance
+4. Monthly payments"
                 value={formData.existingLoanDetails}
                 className="min-h-[120px]"
                 onChange={(e) =>

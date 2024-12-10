@@ -78,6 +78,7 @@ export type Database = {
           occupation: string | null
           reference_address: string
           reference_full_name: string
+          reference_number: string | null
           reference_occupation: string
           reference_phone: string
           reference_relationship: string
@@ -116,6 +117,7 @@ export type Database = {
           occupation?: string | null
           reference_address: string
           reference_full_name: string
+          reference_number?: string | null
           reference_occupation: string
           reference_phone: string
           reference_relationship: string
@@ -154,6 +156,7 @@ export type Database = {
           occupation?: string | null
           reference_address?: string
           reference_full_name?: string
+          reference_number?: string | null
           reference_occupation?: string
           reference_phone?: string
           reference_relationship?: string
