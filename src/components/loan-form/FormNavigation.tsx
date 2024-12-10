@@ -27,7 +27,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     try {
       const transformedData = {
         user_id: session.user.id,
-        is_draft: true,
+        status: 'draft',
         first_name: formData.firstName,
         surname: formData.surname,
         date_of_birth: formData.dateOfBirth,
@@ -67,7 +67,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
         result = await supabase
           .from("loan_applications")
           .update(transformedData)
-          .eq("id", draftId)
+          .eq('id', draftId)
           .select()
           .single();
       } else {
@@ -76,10 +76,10 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           .from("loan_applications")
           .select("id")
           .eq("user_id", session.user.id)
-          .eq("is_draft", true)
-          .maybeSingle(); // Changed from single() to maybeSingle()
+          .eq("status", "draft")
+          .maybeSingle();
 
-        if (existingError && existingError.code !== 'PGRST116') { // Ignore "no rows returned" error
+        if (existingError && existingError.code !== 'PGRST116') {
           console.error("Error checking existing draft:", existingError);
           toast.error("Failed to save draft");
           return;
