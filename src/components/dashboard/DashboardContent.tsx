@@ -40,19 +40,40 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
 
   const handleDeleteDraft = async (draftId: string) => {
     try {
+      console.log("Attempting to delete draft:", draftId);
+      
+      // First delete any terms acceptances for this draft
+      const { error: termsDeleteError } = await supabase
+        .from("terms_acceptances")
+        .delete()
+        .eq('loan_application_id', draftId);
+
+      if (termsDeleteError) {
+        console.error("Error deleting terms acceptances:", termsDeleteError);
+        throw termsDeleteError;
+      }
+
+      console.log("Terms acceptances deleted successfully");
+
+      // Then delete the draft application
       const { error: deleteError } = await supabase
         .from("loan_applications")
         .delete()
         .eq('id', draftId)
         .eq('user_id', session?.user?.id)
-        .eq('is_draft', true);
+        .eq('is_draft', true)
+        .single();
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error("Error deleting draft:", deleteError);
+        throw deleteError;
+      }
 
+      console.log("Draft deleted successfully");
       toast.success("Draft application deleted successfully");
       refetchApplications();
     } catch (error: any) {
-      console.error("Error deleting draft:", error);
+      console.error("Error in handleDeleteDraft:", error);
       toast.error(error.message || "Failed to delete draft application");
     }
   };
