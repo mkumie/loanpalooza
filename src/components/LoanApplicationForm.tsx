@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FormHeader } from "./loan-form/FormHeader";
 import { PersonalDetailsSection } from "./loan-form/PersonalDetailsSection";
 import { EmploymentDetailsSection } from "./loan-form/EmploymentDetailsSection";
@@ -12,10 +12,71 @@ import { LoanApplicationProvider, useLoanApplication } from "@/contexts/LoanAppl
 import { validateCurrentStep, validateAllSteps, showValidationErrors } from "@/utils/loanFormValidation";
 import { DocumentUpload } from "./loan/DocumentUpload";
 import { useFormSubmission } from "./loan-form/useFormSubmission";
+import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const LoanApplicationFormContent = () => {
   const { formData, setFormData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
   const handleSubmit = useFormSubmission(formData, setIsSubmitting);
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draft');
+
+  useEffect(() => {
+    const loadDraftData = async () => {
+      if (!draftId) return;
+
+      try {
+        const { data: draft, error } = await supabase
+          .from("loan_applications")
+          .select("*")
+          .eq("id", draftId)
+          .single();
+
+        if (error) throw error;
+
+        if (draft) {
+          setFormData({
+            firstName: draft.first_name,
+            surname: draft.surname,
+            dateOfBirth: draft.date_of_birth,
+            gender: draft.gender,
+            maritalStatus: draft.marital_status,
+            district: draft.district,
+            village: draft.village,
+            homeProvince: draft.home_province,
+            employmentStatus: draft.employment_status,
+            employerName: draft.employer_name || "",
+            occupation: draft.occupation || "",
+            monthlyIncome: draft.monthly_income.toString(),
+            employmentLength: draft.employment_length || "",
+            workAddress: draft.work_address || "",
+            workPhone: draft.work_phone || "",
+            loanAmount: draft.loan_amount.toString(),
+            loanPurpose: draft.loan_purpose,
+            repaymentPeriod: draft.repayment_period.toString(),
+            existingLoans: draft.existing_loans,
+            existingLoanDetails: draft.existing_loan_details || "",
+            referenceFullName: draft.reference_full_name,
+            referenceRelationship: draft.reference_relationship,
+            referenceAddress: draft.reference_address,
+            referencePhone: draft.reference_phone,
+            referenceOccupation: draft.reference_occupation,
+            bankName: draft.bank_name,
+            accountNumber: draft.account_number,
+            accountType: draft.account_type,
+            branchName: draft.branch_name,
+            accountHolderName: draft.account_holder_name,
+          });
+        }
+      } catch (error: any) {
+        toast.error("Failed to load draft application");
+        console.error("Error loading draft:", error);
+      }
+    };
+
+    loadDraftData();
+  }, [draftId, setFormData]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +117,7 @@ const LoanApplicationFormContent = () => {
           {currentStep === 3 && <LoanDetailsSection formData={formData} setFormData={setFormData} />}
           {currentStep === 4 && <ReferenceDetailsSection formData={formData} setFormData={setFormData} />}
           {currentStep === 5 && <PaymentDetailsSection formData={formData} setFormData={setFormData} />}
-          {currentStep === 6 && <DocumentUpload applicationId={null} />}
+          {currentStep === 6 && <DocumentUpload applicationId={draftId} />}
         </div>
 
         <FormNavigation />

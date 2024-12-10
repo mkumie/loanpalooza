@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { useLoanApplication } from "@/contexts/LoanApplicationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 
 export const FormNavigation = () => {
   const { currentStep, setCurrentStep, isSubmitting, formData } = useLoanApplication();
   const session = useSession();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draft');
 
   const handleSaveDraft = async () => {
     if (!session?.user) {
@@ -19,14 +21,6 @@ export const FormNavigation = () => {
     }
 
     try {
-      // First, check if user has an existing draft
-      const { data: existingDrafts } = await supabase
-        .from("loan_applications")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .eq("is_draft", true)
-        .single();
-
       const transformedData = {
         user_id: session.user.id,
         is_draft: true,
@@ -64,27 +58,49 @@ export const FormNavigation = () => {
 
       let result;
       
-      if (existingDrafts) {
+      if (draftId) {
         // Update existing draft
         result = await supabase
           .from("loan_applications")
           .update(transformedData)
-          .eq("id", existingDrafts.id)
+          .eq("id", draftId)
           .select()
           .single();
       } else {
-        // Create new draft
-        result = await supabase
+        // Check for existing draft
+        const { data: existingDraft } = await supabase
           .from("loan_applications")
-          .insert(transformedData)
-          .select()
+          .select("id")
+          .eq("user_id", session.user.id)
+          .eq("is_draft", true)
           .single();
+
+        if (existingDraft) {
+          // Update existing draft
+          result = await supabase
+            .from("loan_applications")
+            .update(transformedData)
+            .eq("id", existingDraft.id)
+            .select()
+            .single();
+        } else {
+          // Create new draft
+          result = await supabase
+            .from("loan_applications")
+            .insert(transformedData)
+            .select()
+            .single();
+        }
       }
 
       if (result.error) throw result.error;
 
       toast.success("Draft saved successfully");
-      navigate("/dashboard");
+      // Stay on the current page/section instead of navigating away
+      if (!draftId) {
+        // Only update URL if we're not already working with a draft
+        navigate(`/apply?draft=${result.data.id}`, { replace: true });
+      }
     } catch (error: any) {
       console.error("Error saving draft:", error);
       toast.error(error.message || "Failed to save draft");
