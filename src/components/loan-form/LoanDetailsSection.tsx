@@ -46,6 +46,7 @@ export const LoanDetailsSection = ({
         .from('loan_applications')
         .select('loan_amount, loan_purpose, created_at, reference_number, status')
         .eq('user_id', session.user.id)
+        .eq('is_draft', false) // Only get non-draft applications
         .not('status', 'eq', 'rejected')
         .order('created_at', { ascending: false });
 
