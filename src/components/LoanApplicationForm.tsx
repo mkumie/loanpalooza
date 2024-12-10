@@ -20,6 +20,7 @@ const LoanApplicationFormContent = () => {
   const { formData, setFormData, currentStep, setCurrentStep, setIsSubmitting } = useLoanApplication();
   const handleSubmit = useFormSubmission(formData, setIsSubmitting);
   const [searchParams] = useSearchParams();
+  const [validationErrors, setValidationErrors] = React.useState<Record<string, string>>({});
   const draftId = searchParams.get('draft');
 
   useEffect(() => {
@@ -80,8 +81,11 @@ const LoanApplicationFormContent = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationErrors({});
     
-    if (!validateCurrentStep(currentStep, formData)) {
+    const errors = validateCurrentStep(currentStep, formData);
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
       return;
     }
 
@@ -112,11 +116,39 @@ const LoanApplicationFormContent = () => {
         <ProgressStepper />
 
         <div className="space-y-8">
-          {currentStep === 1 && <PersonalDetailsSection />}
-          {currentStep === 2 && <EmploymentDetailsSection formData={formData} setFormData={setFormData} />}
-          {currentStep === 3 && <LoanDetailsSection formData={formData} setFormData={setFormData} />}
-          {currentStep === 4 && <ReferenceDetailsSection formData={formData} setFormData={setFormData} />}
-          {currentStep === 5 && <PaymentDetailsSection formData={formData} setFormData={setFormData} />}
+          {currentStep === 1 && (
+            <PersonalDetailsSection 
+              validationErrors={validationErrors} 
+            />
+          )}
+          {currentStep === 2 && (
+            <EmploymentDetailsSection 
+              formData={formData} 
+              setFormData={setFormData} 
+              validationErrors={validationErrors}
+            />
+          )}
+          {currentStep === 3 && (
+            <LoanDetailsSection 
+              formData={formData} 
+              setFormData={setFormData}
+              validationErrors={validationErrors}
+            />
+          )}
+          {currentStep === 4 && (
+            <ReferenceDetailsSection 
+              formData={formData} 
+              setFormData={setFormData}
+              validationErrors={validationErrors}
+            />
+          )}
+          {currentStep === 5 && (
+            <PaymentDetailsSection 
+              formData={formData} 
+              setFormData={setFormData}
+              validationErrors={validationErrors}
+            />
+          )}
           {currentStep === 6 && <DocumentUpload applicationId={draftId} />}
         </div>
 
