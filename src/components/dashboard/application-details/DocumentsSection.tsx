@@ -17,6 +17,11 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
   const { data: documents, isLoading } = useQuery({
     queryKey: ["loanDocuments", applicationId],
     queryFn: async () => {
+      // Only fetch if we have a valid applicationId
+      if (!applicationId) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from("loan_documents")
         .select("*")
@@ -25,6 +30,8 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
       if (error) throw error;
       return data;
     },
+    // Disable the query if we don't have a valid applicationId
+    enabled: Boolean(applicationId),
   });
 
   const handleView = async (filePath: string, fileName: string, fileType: string) => {
