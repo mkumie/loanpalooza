@@ -16,12 +16,13 @@ export const LoanFormContent = () => {
     termsAgreed,
     setTermsAgreed,
     validationErrors,
+    handleSubmit,
   } = useFormSteps();
 
   const { draftId } = useDraftApplication();
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-16 max-w-5xl space-y-8">
+    <form onSubmit={handleSubmit} className="container mx-auto px-4 py-8 mt-16 max-w-5xl space-y-8">
       <FormHeader logoUrl="/lovable-uploads/58b13019-da3c-47e4-8458-ebac6ebf7cee.png" />
       <ProgressStepper />
 
@@ -43,6 +44,6 @@ export const LoanFormContent = () => {
           (currentStep === 7 && !termsAgreed)
         } 
       />
-    </div>
+    </form>
   );
 };
