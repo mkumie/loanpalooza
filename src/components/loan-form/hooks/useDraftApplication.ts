@@ -4,22 +4,23 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLoanApplication } from "@/contexts/LoanApplicationContext";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export const useDraftApplication = () => {
   const { setFormData } = useLoanApplication();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draft');
+  const session = useSession();
 
   const { data: draftData } = useQuery({
     queryKey: ['draft-application', draftId],
     queryFn: async () => {
-      if (!draftId) return null;
+      if (!draftId || !session?.user) return null;
 
       const { data, error } = await supabase
         .from('loan_applications')
         .select('*')
         .eq('id', draftId)
-        .eq('status', 'draft')
         .single();
 
       if (error) {
@@ -30,7 +31,7 @@ export const useDraftApplication = () => {
 
       return data;
     },
-    enabled: !!draftId,
+    enabled: !!draftId && !!session?.user,
   });
 
   useEffect(() => {
