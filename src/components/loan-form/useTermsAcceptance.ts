@@ -14,6 +14,24 @@ export const useTermsAcceptance = (applicationId: string | null) => {
         return false;
       }
 
+      if (!applicationId) {
+        console.error('No application ID provided');
+        return false;
+      }
+
+      // Check if terms acceptance already exists for this application
+      const { data: existingAcceptance } = await supabase
+        .from('terms_acceptances')
+        .select('id')
+        .eq('loan_application_id', applicationId)
+        .single();
+
+      if (existingAcceptance) {
+        // Terms already accepted, return success
+        console.log('Terms already accepted for this application');
+        return true;
+      }
+
       const { data: latestTerms } = await supabase
         .from('terms_versions')
         .select('id')
@@ -22,6 +40,7 @@ export const useTermsAcceptance = (applicationId: string | null) => {
         .single();
 
       if (!latestTerms) {
+        console.error('No terms version found');
         throw new Error('No terms version found');
       }
 
