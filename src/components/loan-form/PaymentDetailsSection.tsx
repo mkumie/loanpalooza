@@ -95,6 +95,10 @@ export const PaymentDetailsSection = ({
         result = data;
       }
 
+      if (!result?.id) {
+        throw new Error("Failed to save application - no ID returned");
+      }
+
       toast.success("Application details saved successfully");
       
       // Update URL with the application ID if it's a new application
@@ -102,7 +106,12 @@ export const PaymentDetailsSection = ({
         navigate(`/apply?draft=${result.id}`, { replace: true });
       }
       
-      setCurrentStep(6); // Proceed to document upload
+      // Only proceed if we have a valid application ID
+      if (result.id) {
+        setCurrentStep(6); // Proceed to document upload
+      } else {
+        toast.error("Unable to proceed - application ID not found");
+      }
     } catch (error: any) {
       console.error("Error saving application details:", error);
       toast.error(error.message || "Failed to save application details");
