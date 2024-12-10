@@ -18,11 +18,10 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
-  // Fetch existing documents
   const { data: uploadedDocuments, refetch: refetchDocuments } = useQuery({
     queryKey: ["loanDocuments", applicationId],
     queryFn: async () => {
-      if (!applicationId) {
+      if (!applicationId?.trim()) {
         return [];
       }
 
@@ -34,7 +33,7 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
       if (error) throw error;
       return data;
     },
-    enabled: Boolean(applicationId), // Only run query if we have a valid applicationId
+    enabled: Boolean(applicationId?.trim()),
   });
 
   // Calculate document status
@@ -55,7 +54,7 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
   }, [areRequiredDocumentsUploaded, onValidationChange]);
 
   const handleUpload = async (file: File, documentType: DocumentType) => {
-    if (!applicationId) {
+    if (!applicationId?.trim()) {
       toast({
         title: "Error",
         description: "Invalid application ID",
