@@ -40,15 +40,6 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
 
   const handleDeleteDraft = async (draftId: string) => {
     try {
-      // First delete any terms acceptances for this draft
-      const { error: termsDeleteError } = await supabase
-        .from("terms_acceptances")
-        .delete()
-        .eq('loan_application_id', draftId);
-
-      if (termsDeleteError) throw termsDeleteError;
-
-      // Then delete the draft application
       const { error: deleteError } = await supabase
         .from("loan_applications")
         .delete()
