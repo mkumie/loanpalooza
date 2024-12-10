@@ -26,18 +26,13 @@ export const useDraftApplication = () => {
         .from('loan_applications')
         .select('*')
         .eq('id', draftId)
+        .eq('user_id', session.user.id)
+        .eq('status', 'draft')
         .single();
 
       if (error) {
         console.error('Error fetching draft:', error);
         toast.error('Failed to load draft application');
-        return null;
-      }
-
-      // Verify the draft belongs to the user
-      if (data.user_id !== session.user.id) {
-        console.error('Draft does not belong to current user');
-        toast.error('You do not have permission to view this draft');
         return null;
       }
 
