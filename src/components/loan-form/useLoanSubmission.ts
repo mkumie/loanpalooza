@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 import { toast } from "sonner";
@@ -6,18 +5,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { LoanStatus } from "@/types/loan";
 
 export const useLoanSubmission = (formData: LoanApplicationData) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draft');
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    const user = (await supabase.auth.getUser()).data.user;
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       toast.error("You must be logged in to submit an application");
-      setIsSubmitting(false);
       return null;
     }
 
@@ -65,7 +61,7 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
       if (draftId) {
         // Update existing draft application
         console.log("Updating existing draft application:", draftId);
-        result = await supabase
+        const { data, error } = await supabase
           .from("loan_applications")
           .update(applicationData)
           .eq('id', draftId)
@@ -73,34 +69,55 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
           .eq('status', 'draft')
           .select()
           .single();
+
+        if (error) throw error;
+        result = data;
       } else {
         // Create new application
         console.log("Creating new application");
-        result = await supabase
+        const { data, error } = await supabase
           .from("loan_applications")
           .insert(applicationData)
           .select()
           .single();
+
+        if (error) throw error;
+        result = data;
       }
 
-      if (result.error) throw result.error;
-      console.log("Application submitted successfully:", result.data.id);
+      // Get the latest terms version
+      const { data: latestTerms, error: termsError } = await supabase
+        .from("terms_versions")
+        .select("id")
+        .order('effective_date', { ascending: false })
+        .limit(1)
+        .single();
 
+      if (termsError) throw termsError;
+
+      // Record terms acceptance
+      const { error: acceptanceError } = await supabase
+        .from("terms_acceptances")
+        .insert({
+          user_id: user.id,
+          loan_application_id: result.id,
+          terms_version_id: latestTerms.id,
+        });
+
+      if (acceptanceError) throw acceptanceError;
+
+      console.log("Application submitted successfully:", result.id);
       toast.success("Application submitted successfully!");
       navigate("/dashboard");
-      return result.data.id;
+      return result.id;
     } catch (error: any) {
       console.error("Error submitting application:", error);
       toast.error(error.message || "Failed to submit application");
       return null;
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return {
-    isSubmitting,
-    setIsSubmitting,
     handleSubmit
   };
 };
