@@ -21,8 +21,20 @@ export const useLoanSubmission = (formData: LoanApplicationData) => {
     }
 
     try {
-      // If this is a draft submission, delete the draft first
+      // If this is a draft submission, delete related records first
       if (draftId) {
+        // First delete any terms acceptances for this draft
+        const { error: termsDeleteError } = await supabase
+          .from("terms_acceptances")
+          .delete()
+          .eq('loan_application_id', draftId);
+
+        if (termsDeleteError) {
+          console.error("Error deleting terms acceptances:", termsDeleteError);
+          throw termsDeleteError;
+        }
+
+        // Then delete the draft application
         const { error: deleteError } = await supabase
           .from("loan_applications")
           .delete()
