@@ -17,10 +17,14 @@ export const useDraftApplication = () => {
     queryFn: async () => {
       if (!draftId || !session?.user) return null;
 
+      console.log("Fetching draft application:", draftId);
+      
       const { data, error } = await supabase
         .from('loan_applications')
         .select('*')
         .eq('id', draftId)
+        .eq('user_id', session.user.id)
+        .eq('status', 'draft')
         .single();
 
       if (error) {
@@ -29,6 +33,7 @@ export const useDraftApplication = () => {
         return null;
       }
 
+      console.log("Draft data fetched:", data);
       return data;
     },
     enabled: !!draftId && !!session?.user,
