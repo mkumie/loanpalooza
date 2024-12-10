@@ -22,16 +22,9 @@ interface LoanDetailsSectionProps {
 }
 
 const loanPurposes = [
-  "Business Startup",
-  "Business Expansion",
-  "Equipment Purchase",
-  "Working Capital",
-  "Inventory Finance",
-  "Debt Consolidation",
-  "Property Purchase",
-  "Vehicle Finance",
-  "Education",
-  "Personal Use",
+  "Personal Loan",
+  "School Fee Loan",
+  "Refinancing Loan"
 ];
 
 export const LoanDetailsSection = ({
