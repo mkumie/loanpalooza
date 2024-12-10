@@ -2,6 +2,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
+import { useLoanApplication } from "@/contexts/LoanApplicationContext";
 
 interface PaymentDetailsSectionProps {
   formData: {
@@ -20,6 +24,43 @@ export const PaymentDetailsSection = ({
   setFormData,
   validationErrors,
 }: PaymentDetailsSectionProps) => {
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draft');
+  const { setCurrentStep, isSubmitting, setIsSubmitting } = useLoanApplication();
+
+  const handleNextStep = async () => {
+    // Validate required fields
+    if (!formData.bankName || !formData.accountNumber || !formData.accountType || 
+        !formData.branchName || !formData.accountHolderName) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("loan_applications")
+        .update({
+          bank_name: formData.bankName,
+          account_number: formData.accountNumber,
+          account_type: formData.accountType,
+          branch_name: formData.branchName,
+          account_holder_name: formData.accountHolderName,
+        })
+        .eq('id', draftId);
+
+      if (error) throw error;
+
+      toast.success("Bank details saved successfully");
+      setCurrentStep(6); // Proceed to document upload
+    } catch (error: any) {
+      console.error("Error saving bank details:", error);
+      toast.error(error.message || "Failed to save bank details");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="bg-primary text-white">

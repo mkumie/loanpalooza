@@ -144,18 +144,28 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
         >
           Save Draft
         </Button>
-        <Button 
-          type="submit" 
-          className="bg-primary hover:bg-primary-600"
-          disabled={isSubmitting || isSubmitDisabled}
-        >
-          {isSubmitting 
-            ? "Submitting..." 
-            : currentStep === 7
-              ? "Submit Application" 
-              : "Next"
-          }
-        </Button>
+        {currentStep === 5 ? (
+          <Button 
+            type="submit" 
+            className="bg-primary hover:bg-primary-600"
+            disabled={isSubmitting || isSubmitDisabled}
+          >
+            {isSubmitting ? "Saving..." : "Save and Continue"}
+          </Button>
+        ) : (
+          <Button 
+            type="submit" 
+            className="bg-primary hover:bg-primary-600"
+            disabled={isSubmitting || isSubmitDisabled}
+          >
+            {isSubmitting 
+              ? "Submitting..." 
+              : currentStep === 7
+                ? "Submit Application" 
+                : "Next"
+            }
+          </Button>
+        )}
       </div>
     </div>
   );
