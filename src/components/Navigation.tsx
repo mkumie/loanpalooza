@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User } from "lucide-react";
 
 export const Navigation = () => {
   const session = useSession();
@@ -21,9 +28,23 @@ export const Navigation = () => {
           </div>
           <div className="flex items-center gap-4">
             {session ? (
-              <Link to="/dashboard">
-                <Button>Dashboard</Button>
-              </Link>
+              <>
+                <Link to="/dashboard">
+                  <Button variant="ghost">Dashboard</Button>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <Link to="/profile">
+                      <DropdownMenuItem>Profile</DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Link to="/login">
