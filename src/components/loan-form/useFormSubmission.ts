@@ -4,11 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 
+type LoanStatus = "pending" | "approved" | "rejected" | "draft";
+
 const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: string, isDraft: boolean = false) => {
+  const status: LoanStatus = isDraft ? "draft" : "pending";
+  
   return {
     user_id: userId,
     is_draft: isDraft,
-    status: isDraft ? 'draft' : 'pending',
+    status,
     first_name: formData.firstName,
     surname: formData.surname,
     date_of_birth: formData.dateOfBirth,
