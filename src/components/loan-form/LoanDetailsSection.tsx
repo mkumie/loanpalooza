@@ -26,11 +26,13 @@ interface LoanDetailsSectionProps {
     existingLoanDetails: string;
   };
   setFormData: (data: any) => void;
+  validationErrors: Record<string, string>;
 }
 
 export const LoanDetailsSection = ({
   formData,
   setFormData,
+  validationErrors,
 }: LoanDetailsSectionProps) => {
   return (
     <Card>
@@ -42,6 +44,7 @@ export const LoanDetailsSection = ({
           loanAmount={formData.loanAmount}
           repaymentPeriod={formData.repaymentPeriod}
           setFormData={setFormData}
+          validationErrors={validationErrors}
         />
 
         <div className="col-span-2 space-y-2">
@@ -52,7 +55,7 @@ export const LoanDetailsSection = ({
               setFormData({ ...formData, loanPurpose: value })
             }
           >
-            <SelectTrigger id="loanPurpose">
+            <SelectTrigger id="loanPurpose" className={validationErrors.loanPurpose ? "border-red-500" : ""}>
               <SelectValue placeholder="Select the purpose of your loan" />
             </SelectTrigger>
             <SelectContent>
@@ -63,6 +66,9 @@ export const LoanDetailsSection = ({
               ))}
             </SelectContent>
           </Select>
+          {validationErrors.loanPurpose && (
+            <p className="text-sm text-red-500">{validationErrors.loanPurpose}</p>
+          )}
         </div>
 
         <div className="col-span-2 space-y-4">

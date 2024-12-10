@@ -12,11 +12,13 @@ interface PaymentDetailsSectionProps {
     accountHolderName: string;
   };
   setFormData: (data: any) => void;
+  validationErrors: Record<string, string>;
 }
 
 export const PaymentDetailsSection = ({
   formData,
   setFormData,
+  validationErrors,
 }: PaymentDetailsSectionProps) => {
   return (
     <Card>
@@ -32,6 +34,8 @@ export const PaymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, bankName: e.target.value })
             }
+            error={!!validationErrors.bankName}
+            errorMessage={validationErrors.bankName}
           />
         </div>
 
@@ -43,6 +47,8 @@ export const PaymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, accountNumber: e.target.value })
             }
+            error={!!validationErrors.accountNumber}
+            errorMessage={validationErrors.accountNumber}
           />
         </div>
 
@@ -54,7 +60,7 @@ export const PaymentDetailsSection = ({
               setFormData({ ...formData, accountType: value })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger id="accountType" className={validationErrors.accountType ? "border-red-500" : ""}>
               <SelectValue placeholder="Select account type" />
             </SelectTrigger>
             <SelectContent>
@@ -63,6 +69,9 @@ export const PaymentDetailsSection = ({
               <SelectItem value="current">Current Account</SelectItem>
             </SelectContent>
           </Select>
+          {validationErrors.accountType && (
+            <p className="text-sm text-red-500">{validationErrors.accountType}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -73,6 +82,8 @@ export const PaymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, branchName: e.target.value })
             }
+            error={!!validationErrors.branchName}
+            errorMessage={validationErrors.branchName}
           />
         </div>
 
@@ -84,6 +95,8 @@ export const PaymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, accountHolderName: e.target.value })
             }
+            error={!!validationErrors.accountHolderName}
+            errorMessage={validationErrors.accountHolderName}
           />
         </div>
       </CardContent>

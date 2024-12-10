@@ -11,11 +11,13 @@ interface ReferenceDetailsSectionProps {
     referenceOccupation: string;
   };
   setFormData: (data: any) => void;
+  validationErrors: Record<string, string>;
 }
 
 export const ReferenceDetailsSection = ({
   formData,
   setFormData,
+  validationErrors,
 }: ReferenceDetailsSectionProps) => {
   return (
     <Card>
@@ -31,6 +33,8 @@ export const ReferenceDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, referenceFullName: e.target.value })
             }
+            error={!!validationErrors.referenceFullName}
+            errorMessage={validationErrors.referenceFullName}
           />
         </div>
 
@@ -42,6 +46,8 @@ export const ReferenceDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, referenceRelationship: e.target.value })
             }
+            error={!!validationErrors.referenceRelationship}
+            errorMessage={validationErrors.referenceRelationship}
           />
         </div>
 
@@ -54,6 +60,8 @@ export const ReferenceDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, referencePhone: e.target.value })
             }
+            error={!!validationErrors.referencePhone}
+            errorMessage={validationErrors.referencePhone}
           />
         </div>
 
@@ -65,6 +73,8 @@ export const ReferenceDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, referenceOccupation: e.target.value })
             }
+            error={!!validationErrors.referenceOccupation}
+            errorMessage={validationErrors.referenceOccupation}
           />
         </div>
 
@@ -76,6 +86,8 @@ export const ReferenceDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, referenceAddress: e.target.value })
             }
+            error={!!validationErrors.referenceAddress}
+            errorMessage={validationErrors.referenceAddress}
           />
         </div>
       </CardContent>

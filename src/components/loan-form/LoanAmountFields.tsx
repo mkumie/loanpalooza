@@ -5,9 +5,15 @@ interface LoanAmountFieldsProps {
   loanAmount: string;
   repaymentPeriod: string;
   setFormData: (data: any) => void;
+  validationErrors: Record<string, string>;
 }
 
-export const LoanAmountFields = ({ loanAmount, repaymentPeriod, setFormData }: LoanAmountFieldsProps) => {
+export const LoanAmountFields = ({ 
+  loanAmount, 
+  repaymentPeriod, 
+  setFormData,
+  validationErrors 
+}: LoanAmountFieldsProps) => {
   return (
     <>
       <div className="space-y-2">
@@ -19,6 +25,8 @@ export const LoanAmountFields = ({ loanAmount, repaymentPeriod, setFormData }: L
           onChange={(e) =>
             setFormData((prev: any) => ({ ...prev, loanAmount: e.target.value }))
           }
+          error={!!validationErrors.loanAmount}
+          errorMessage={validationErrors.loanAmount}
         />
       </div>
 
@@ -36,6 +44,8 @@ export const LoanAmountFields = ({ loanAmount, repaymentPeriod, setFormData }: L
           onChange={(e) =>
             setFormData((prev: any) => ({ ...prev, repaymentPeriod: e.target.value }))
           }
+          error={!!validationErrors.repaymentPeriod}
+          errorMessage={validationErrors.repaymentPeriod}
         />
         {repaymentPeriod && (
           <p className="text-sm text-gray-500">

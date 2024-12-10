@@ -14,11 +14,13 @@ interface EmploymentDetailsSectionProps {
     workPhone: string;
   };
   setFormData: (data: any) => void;
+  validationErrors: Record<string, string>;
 }
 
 export const EmploymentDetailsSection = ({
   formData,
   setFormData,
+  validationErrors,
 }: EmploymentDetailsSectionProps) => {
   return (
     <Card>
@@ -44,6 +46,9 @@ export const EmploymentDetailsSection = ({
               <Label htmlFor="self-employed">Self-Employed</Label>
             </div>
           </RadioGroup>
+          {validationErrors.employmentStatus && (
+            <p className="text-sm text-red-500">{validationErrors.employmentStatus}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -54,6 +59,8 @@ export const EmploymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, employerName: e.target.value })
             }
+            error={!!validationErrors.employerName}
+            errorMessage={validationErrors.employerName}
           />
         </div>
 
@@ -65,6 +72,8 @@ export const EmploymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, occupation: e.target.value })
             }
+            error={!!validationErrors.occupation}
+            errorMessage={validationErrors.occupation}
           />
         </div>
 
@@ -77,6 +86,8 @@ export const EmploymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, monthlyIncome: e.target.value })
             }
+            error={!!validationErrors.monthlyIncome}
+            errorMessage={validationErrors.monthlyIncome}
           />
         </div>
 
@@ -89,6 +100,8 @@ export const EmploymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, employmentLength: e.target.value })
             }
+            error={!!validationErrors.employmentLength}
+            errorMessage={validationErrors.employmentLength}
           />
         </div>
 
@@ -101,6 +114,8 @@ export const EmploymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, workPhone: e.target.value })
             }
+            error={!!validationErrors.workPhone}
+            errorMessage={validationErrors.workPhone}
           />
         </div>
 
@@ -112,6 +127,8 @@ export const EmploymentDetailsSection = ({
             onChange={(e) =>
               setFormData({ ...formData, workAddress: e.target.value })
             }
+            error={!!validationErrors.workAddress}
+            errorMessage={validationErrors.workAddress}
           />
         </div>
       </CardContent>
