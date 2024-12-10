@@ -51,6 +51,36 @@ export type Database = {
         }
         Relationships: []
       }
+      interest_rates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          effective_from: string | null
+          id: string
+          is_active: boolean | null
+          rate_percentage: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_from?: string | null
+          id?: string
+          is_active?: boolean | null
+          rate_percentage: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_from?: string | null
+          id?: string
+          is_active?: boolean | null
+          rate_percentage?: number
+        }
+        Relationships: []
+      }
       loan_applications: {
         Row: {
           account_holder_name: string
@@ -211,6 +241,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      loan_penalties: {
+        Row: {
+          amount: number
+          applied_at: string | null
+          applied_by: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          loan_application_id: string | null
+          paid_amount: number | null
+          penalty_type_id: string | null
+          reason: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          applied_at?: string | null
+          applied_by?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          loan_application_id?: string | null
+          paid_amount?: number | null
+          penalty_type_id?: string | null
+          reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          applied_at?: string | null
+          applied_by?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          loan_application_id?: string | null
+          paid_amount?: number | null
+          penalty_type_id?: string | null
+          reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_penalties_loan_application_id_fkey"
+            columns: ["loan_application_id"]
+            isOneToOne: false
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_penalties_penalty_type_id_fkey"
+            columns: ["penalty_type_id"]
+            isOneToOne: false
+            referencedRelation: "penalty_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      penalty_types: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          fixed_amount: number | null
+          id: string
+          is_active: boolean | null
+          is_percentage: boolean | null
+          name: string
+          rate_percentage: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          fixed_amount?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_percentage?: boolean | null
+          name: string
+          rate_percentage?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          fixed_amount?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_percentage?: boolean | null
+          name?: string
+          rate_percentage?: number | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

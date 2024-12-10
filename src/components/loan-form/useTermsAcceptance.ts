@@ -7,6 +7,13 @@ export const useTermsAcceptance = (applicationId: string | null) => {
 
   const recordTermsAcceptance = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('You must be logged in to accept terms');
+        return false;
+      }
+
       const { data: latestTerms } = await supabase
         .from('terms_versions')
         .select('id')
@@ -21,17 +28,23 @@ export const useTermsAcceptance = (applicationId: string | null) => {
       const { error } = await supabase
         .from('terms_acceptances')
         .insert({
+          user_id: user.id,
           loan_application_id: applicationId,
           terms_version_id: latestTerms.id,
+          ip_address: window.location.hostname,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error recording terms acceptance:', error);
+        throw error;
+      }
+
+      return true;
     } catch (error: any) {
       console.error('Error recording terms acceptance:', error);
       toast.error('Failed to record terms acceptance');
       return false;
     }
-    return true;
   };
 
   return {
