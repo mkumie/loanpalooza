@@ -21,6 +21,7 @@ const LoanApplicationFormContent = () => {
   const handleSubmit = useFormSubmission(formData, setIsSubmitting);
   const [searchParams] = useSearchParams();
   const [validationErrors, setValidationErrors] = React.useState<Record<string, string>>({});
+  const [areDocumentsValid, setAreDocumentsValid] = React.useState(false);
   const draftId = searchParams.get('draft');
 
   useEffect(() => {
@@ -95,6 +96,12 @@ const LoanApplicationFormContent = () => {
       return;
     }
 
+    // Check if required documents are uploaded
+    if (!areDocumentsValid) {
+      toast.error("Please upload all required documents before submitting");
+      return;
+    }
+
     // Validate all steps before final submission
     const missingRequirements = validateAllSteps(formData);
     if (missingRequirements.length > 0) {
@@ -149,10 +156,15 @@ const LoanApplicationFormContent = () => {
               validationErrors={validationErrors}
             />
           )}
-          {currentStep === 6 && <DocumentUpload applicationId={draftId} />}
+          {currentStep === 6 && (
+            <DocumentUpload 
+              applicationId={draftId} 
+              onValidationChange={setAreDocumentsValid}
+            />
+          )}
         </div>
 
-        <FormNavigation />
+        <FormNavigation isSubmitDisabled={currentStep === 6 && !areDocumentsValid} />
       </form>
     </div>
   );

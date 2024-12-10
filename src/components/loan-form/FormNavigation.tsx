@@ -6,7 +6,11 @@ import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 
-export const FormNavigation = () => {
+interface FormNavigationProps {
+  isSubmitDisabled?: boolean;
+}
+
+export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
   const { currentStep, setCurrentStep, isSubmitting, formData } = useLoanApplication();
   const session = useSession();
   const navigate = useNavigate();
@@ -136,7 +140,7 @@ export const FormNavigation = () => {
         <Button 
           type="submit" 
           className="bg-primary hover:bg-primary-600"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isSubmitDisabled}
         >
           {isSubmitting 
             ? "Submitting..." 

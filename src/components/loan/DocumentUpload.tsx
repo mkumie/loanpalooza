@@ -10,9 +10,10 @@ import { DocumentUploadForm } from "./DocumentUploadForm";
 interface DocumentUploadProps {
   applicationId: string;
   onUploadComplete?: () => void;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
-export const DocumentUpload = ({ applicationId, onUploadComplete }: DocumentUploadProps) => {
+export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationChange }: DocumentUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -36,6 +37,16 @@ export const DocumentUpload = ({ applicationId, onUploadComplete }: DocumentUplo
     uploaded: uploadedDocuments?.some((uploaded) => uploaded.document_type === doc.type) ?? false,
     fileName: uploadedDocuments?.find((uploaded) => uploaded.document_type === doc.type)?.file_name,
   }));
+
+  // Check if all required documents are uploaded
+  const areRequiredDocumentsUploaded = REQUIRED_DOCUMENTS
+    .filter(doc => doc.required)
+    .every(doc => documentStatus.find(status => status.type === doc.type)?.uploaded);
+
+  // Notify parent component about validation status
+  React.useEffect(() => {
+    onValidationChange?.(areRequiredDocumentsUploaded);
+  }, [areRequiredDocumentsUploaded, onValidationChange]);
 
   const handleUpload = async (file: File, documentType: DocumentType) => {
     setIsUploading(true);
