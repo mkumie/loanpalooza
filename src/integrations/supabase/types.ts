@@ -362,6 +362,30 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_policy_versions: {
+        Row: {
+          content: string
+          created_at: string | null
+          effective_date: string | null
+          id: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          version?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null

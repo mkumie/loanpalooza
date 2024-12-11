@@ -13,6 +13,8 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import { LoanApplicationForm } from "./components/LoanApplicationForm";
 import { Footer } from "./components/Footer";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
 import { toast } from "sonner";
 
 // Protected Route wrapper component
@@ -70,6 +72,8 @@ const App: React.FC = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route
                   path="/profile"
                   element={

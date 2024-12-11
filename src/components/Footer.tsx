@@ -40,6 +40,16 @@ export const Footer = () => {
                   Dashboard
                 </Link>
               </li>
+              <li>
+                <Link to="/privacy-policy" className="text-sm text-gray-600 hover:text-primary">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="text-sm text-gray-600 hover:text-primary">
+                  Terms of Use
+                </Link>
+              </li>
             </ul>
           </div>
 
