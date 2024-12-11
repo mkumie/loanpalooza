@@ -25,20 +25,45 @@ export const ApplicationDetails = ({ application, isAdmin, onUpdate }: Applicati
   const session = useSession();
 
   useEffect(() => {
-    // Only show notifications to the applicant, not the admin
-    if (!isAdmin && session?.user?.id === application.user_id) {
+    // Only show notifications to the applicant
+    const isApplicant = session?.user?.id === application.user_id;
+    
+    if (isApplicant && !isAdmin) {
       // Check if status has changed
       if (prevStatusRef.current !== application.status) {
-        toast.info(`Application status updated to ${application.status}`, {
-          description: "The status of your loan application has been updated.",
+        let title = `Application ${application.status}`;
+        let description = "Your loan application status has been updated.";
+        
+        switch (application.status) {
+          case 'approved':
+            title = "Application Approved! 🎉";
+            description = "Congratulations! Your loan application has been approved.";
+            break;
+          case 'rejected':
+            title = "Application Not Approved";
+            description = "Unfortunately, your loan application was not approved at this time.";
+            break;
+          case 'reviewing':
+            title = "Application Under Review";
+            description = "Your application is currently being reviewed by our team.";
+            break;
+          default:
+            break;
+        }
+        
+        toast.info(title, {
+          description: description,
+          duration: 5000,
         });
+        
         prevStatusRef.current = application.status;
       }
 
       // Check if admin comments have changed
       if (prevCommentsRef.current !== application.admin_comments && application.admin_comments) {
-        toast.info("New admin feedback received", {
+        toast.info("New Feedback Available", {
           description: application.admin_comments,
+          duration: 6000,
         });
         prevCommentsRef.current = application.admin_comments;
       }
