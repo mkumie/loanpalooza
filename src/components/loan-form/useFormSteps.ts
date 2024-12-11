@@ -17,13 +17,13 @@ export const useFormSteps = () => {
   const submitApplication = useFormSubmission(formData);
   const { termsAgreed, setTermsAgreed, recordTermsAcceptance } = useTermsAcceptance(draftId);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<boolean> => {
     e.preventDefault();
     console.log("Form submission started");
     
     if (!validateStep(currentStep, formData)) {
       console.log("Validation failed for current step");
-      return;
+      return false;
     }
 
     // If we're not on the final terms step, just move to next step
@@ -31,27 +31,27 @@ export const useFormSteps = () => {
       // If moving to terms step, check documents first
       if (currentStep === 6 && !areDocumentsValid) {
         toast.error("Please upload all required documents before proceeding");
-        return;
+        return false;
       }
       setCurrentStep(currentStep + 1);
-      return;
+      return true;
     }
 
     // Final submission checks
     if (!areDocumentsValid) {
       toast.error("Please upload all required documents before submitting");
-      return;
+      return false;
     }
 
     if (!termsAgreed) {
       toast.error("Please agree to the terms and conditions before submitting");
-      return;
+      return false;
     }
 
     // Validate all steps before final submission
     if (!validateForm(formData)) {
       toast.error("Please ensure all required fields are filled correctly");
-      return;
+      return false;
     }
 
     console.log("Starting final submission process");
@@ -62,7 +62,7 @@ export const useFormSteps = () => {
       const termsRecorded = await recordTermsAcceptance();
       if (!termsRecorded) {
         toast.error("Failed to record terms acceptance");
-        return;
+        return false;
       }
 
       // Submit the application
@@ -70,12 +70,15 @@ export const useFormSteps = () => {
       if (applicationId) {
         console.log("Application submitted successfully:", applicationId);
         toast.success("Application submitted successfully!");
+        return true;
       } else {
         toast.error("Failed to submit application");
+        return false;
       }
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("An error occurred while submitting the application");
+      return false;
     } finally {
       setIsSubmitting(false);
     }
