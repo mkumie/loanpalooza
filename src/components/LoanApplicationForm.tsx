@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { ClientFeedbackForm } from "./ClientFeedbackForm";
 import { LoanFormContent } from "./loan-form/LoanFormContent";
 import { LoanApplicationProvider } from "@/contexts/LoanApplicationContext";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const LoanApplicationForm = () => {
   const navigate = useNavigate();
@@ -14,19 +13,25 @@ export const LoanApplicationForm = () => {
     setShowFeedback(true);
   };
 
-  if (showFeedback) {
-    return (
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-2xl mx-auto">
-          <ClientFeedbackForm onClose={() => navigate("/dashboard")} />
-        </div>
-      </div>
-    );
-  }
+  const handleFeedbackClose = () => {
+    navigate("/dashboard");
+  };
 
   return (
-    <LoanApplicationProvider>
-      <LoanFormContent onSubmitSuccess={handleSubmitSuccess} />
-    </LoanApplicationProvider>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        {showFeedback ? (
+          <Card>
+            <CardContent>
+              <ClientFeedbackForm onClose={handleFeedbackClose} />
+            </CardContent>
+          </Card>
+        ) : (
+          <LoanApplicationProvider>
+            <LoanFormContent onSubmitSuccess={handleSubmitSuccess} />
+          </LoanApplicationProvider>
+        )}
+      </div>
+    </div>
   );
 };
