@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import { LoanApplicationForm } from "./components/LoanApplicationForm";
+import { Footer } from "./components/Footer";
 import { toast } from "sonner";
 
 // Protected Route wrapper component
@@ -57,11 +58,11 @@ const App: React.FC = () => {
   return (
     <SessionContextProvider 
       supabaseClient={supabase}
-      initialSession={null} // Explicitly set to null to prevent initial session issues
+      initialSession={null}
     >
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <div className="min-h-screen">
+          <div className="min-h-screen flex flex-col">
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -94,6 +95,7 @@ const App: React.FC = () => {
                   }
                 />
               </Routes>
+              <Footer />
             </BrowserRouter>
           </div>
         </TooltipProvider>
