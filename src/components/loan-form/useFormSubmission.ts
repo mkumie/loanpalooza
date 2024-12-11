@@ -44,19 +44,32 @@ const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: stri
   };
 };
 
-const updateUserProfile = async (userId: string, formData: LoanApplicationData) => {
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      first_name: formData.firstName,
-      surname: formData.surname,
-      date_of_birth: formData.dateOfBirth,
-      gender: formData.gender,
-    })
-    .eq('id', userId);
+const recordTermsAcceptance = async (userId: string, applicationId: string) => {
+  // Get the latest terms version
+  const { data: latestTerms, error: termsError } = await supabase
+    .from('terms_versions')
+    .select('id')
+    .order('effective_date', { ascending: false })
+    .limit(1)
+    .single();
 
-  if (error) {
-    console.error('Error updating profile:', error);
+  if (termsError) {
+    console.error('Error fetching terms version:', termsError);
+    throw new Error('Failed to record terms acceptance');
+  }
+
+  // Record the acceptance
+  const { error: acceptanceError } = await supabase
+    .from('terms_acceptances')
+    .insert({
+      user_id: userId,
+      loan_application_id: applicationId,
+      terms_version_id: latestTerms.id,
+    });
+
+  if (acceptanceError) {
+    console.error('Error recording terms acceptance:', acceptanceError);
+    throw new Error('Failed to record terms acceptance');
   }
 };
 
@@ -85,8 +98,8 @@ export const useFormSubmission = (formData: LoanApplicationData, setIsSubmitting
 
       if (error) throw error;
 
-      // Update profile with personal details
-      await updateUserProfile(user.id, formData);
+      // Record terms acceptance
+      await recordTermsAcceptance(user.id, data.id);
 
       toast.success("Application submitted successfully!");
       navigate("/dashboard");

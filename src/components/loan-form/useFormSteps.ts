@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLoanApplication } from "@/contexts/LoanApplicationContext";
 import { useFormValidation } from "./useFormValidation";
-import { useLoanSubmission } from "./useLoanSubmission";
+import { useFormSubmission } from "./useFormSubmission";
 import { useTermsAcceptance } from "./useTermsAcceptance";
 import { toast } from "sonner";
 
@@ -13,7 +13,7 @@ export const useFormSteps = () => {
   const draftId = searchParams.get('draft');
 
   const { validationErrors, validateStep, validateForm } = useFormValidation();
-  const { isSubmitting, setIsSubmitting, handleSubmit: submitApplication } = useLoanSubmission(formData);
+  const { isSubmitting, setIsSubmitting, handleSubmit: submitApplication } = useFormSubmission(formData, setIsSubmitting);
   const { termsAgreed, setTermsAgreed, recordTermsAcceptance } = useTermsAcceptance(draftId);
 
   const handleSubmit = async (e: React.FormEvent) => {
