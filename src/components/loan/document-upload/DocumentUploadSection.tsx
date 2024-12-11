@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentChecklist } from "../DocumentChecklist";
 import { DocumentUploadForm } from "../DocumentUploadForm";
@@ -52,7 +53,7 @@ export const DocumentUploadSection = ({
     .every(doc => documentStatus.find(status => status.type === doc.type)?.uploaded);
 
   // Notify parent component about validation status
-  React.useEffect(() => {
+  useEffect(() => {
     onValidationChange?.(areRequiredDocumentsUploaded);
   }, [areRequiredDocumentsUploaded, onValidationChange]);
 
