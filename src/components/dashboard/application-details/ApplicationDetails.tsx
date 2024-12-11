@@ -8,6 +8,8 @@ import { StatusSection } from "./StatusSection";
 import { HeaderSection } from "./HeaderSection";
 import { Separator } from "@/components/ui/separator";
 import { FileText, User, MapPin, Briefcase } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 interface ApplicationDetailsProps {
   application: LoanApplication;
@@ -17,6 +19,26 @@ interface ApplicationDetailsProps {
 
 export const ApplicationDetails = ({ application, isAdmin, onUpdate }: ApplicationDetailsProps) => {
   const showStatusControls = isAdmin && !application.is_draft;
+  const prevStatusRef = useRef(application.status);
+  const prevCommentsRef = useRef(application.admin_comments);
+
+  useEffect(() => {
+    // Check if status has changed
+    if (prevStatusRef.current !== application.status) {
+      toast.info(`Application status updated to ${application.status}`, {
+        description: "The status of your loan application has been updated.",
+      });
+      prevStatusRef.current = application.status;
+    }
+
+    // Check if admin comments have changed
+    if (prevCommentsRef.current !== application.admin_comments && application.admin_comments) {
+      toast.info("New admin feedback received", {
+        description: application.admin_comments,
+      });
+      prevCommentsRef.current = application.admin_comments;
+    }
+  }, [application.status, application.admin_comments]);
 
   return (
     <ScrollArea className="h-[600px] pr-4">
