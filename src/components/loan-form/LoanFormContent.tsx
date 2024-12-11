@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { FormSteps } from "./FormSteps";
 import { FormNavigation } from "./FormNavigation";
-import { FormHeader } from "./FormHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { useFormSteps } from "./useFormSteps";
 import { Navigation } from "../Navigation";
