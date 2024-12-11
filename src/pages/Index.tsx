@@ -6,6 +6,7 @@ import { DocumentChecklist } from "@/components/DocumentChecklist";
 import { LoanCalculator } from "@/components/home/LoanCalculator";
 import { LoanFeatures } from "@/components/home/LoanFeatures";
 import { DownloadableFiles } from "@/components/home/DownloadableFiles";
+import { REQUIRED_DOCUMENTS } from "@/constants/documentRequirements";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -18,6 +19,12 @@ const Index = () => {
       navigate("/register");
     }
   };
+
+  // Create empty document status array since this is just for display
+  const documentStatus = REQUIRED_DOCUMENTS.map(doc => ({
+    type: doc.type,
+    uploaded: false
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -39,7 +46,10 @@ const Index = () => {
           {/* Document Requirements Section */}
           <div className="py-8">
             <h2 className="text-2xl font-semibold mb-6">Required Documents</h2>
-            <DocumentChecklist />
+            <DocumentChecklist 
+              documents={REQUIRED_DOCUMENTS}
+              documentStatus={documentStatus}
+            />
           </div>
 
           <div className="space-y-4">
