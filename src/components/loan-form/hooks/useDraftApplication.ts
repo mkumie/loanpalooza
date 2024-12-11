@@ -29,11 +29,16 @@ export const useDraftApplication = () => {
           .eq('id', draftId)
           .eq('user_id', session.user.id)
           .eq('status', 'draft')
-          .single();
+          .maybeSingle(); // Use maybeSingle() instead of single() to handle no results gracefully
 
         if (error) {
           console.error('Error fetching draft:', error);
           toast.error('Failed to load draft application');
+          return null;
+        }
+
+        if (!data) {
+          toast.error('Draft application not found or access denied');
           return null;
         }
 
@@ -49,9 +54,9 @@ export const useDraftApplication = () => {
           .neq('status', 'draft')
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle(); // Use maybeSingle() here as well
 
-        if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
+        if (error) {
           console.error('Error fetching recent application:', error);
           return null;
         }
@@ -81,7 +86,6 @@ export const useDraftApplication = () => {
         employmentLength: applicationData.employment_length || '',
         workAddress: applicationData.work_address || '',
         workPhone: applicationData.work_phone || '',
-        // Don't prefill loan amount and purpose for new applications
         loanAmount: draftId ? applicationData.loan_amount?.toString() || '' : '',
         loanPurpose: draftId ? applicationData.loan_purpose : '',
         repaymentPeriod: draftId ? applicationData.repayment_period?.toString() || '' : '',
