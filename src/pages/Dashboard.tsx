@@ -4,11 +4,28 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { session, userEmail, isAdmin } = useSessionCheck();
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("first_name, surname")
+        .eq("id", session.user.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
 
   const handleSignOut = async () => {
     try {
@@ -35,6 +52,8 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-6 pt-24">
         <DashboardHeader
           userEmail={userEmail}
+          firstName={profile?.first_name}
+          surname={profile?.surname}
           isAdmin={isAdmin}
           onSignOut={handleSignOut}
         />

@@ -4,12 +4,24 @@ import { LogOut, Plus } from "lucide-react";
 
 interface DashboardHeaderProps {
   userEmail: string | undefined;
+  firstName?: string | null;
+  surname?: string | null;
   isAdmin?: boolean;
   onSignOut: () => void;
 }
 
-export const DashboardHeader = ({ userEmail, isAdmin, onSignOut }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ 
+  userEmail, 
+  firstName, 
+  surname,
+  isAdmin, 
+  onSignOut 
+}: DashboardHeaderProps) => {
   const navigate = useNavigate();
+  
+  const displayName = firstName && surname 
+    ? `${firstName} ${surname}`
+    : firstName || userEmail;
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -18,7 +30,7 @@ export const DashboardHeader = ({ userEmail, isAdmin, onSignOut }: DashboardHead
           {isAdmin ? "Admin Dashboard" : "My Applications"}
         </h1>
         <p className="text-muted-foreground">
-          Welcome back, {userEmail}
+          Welcome back, {displayName}
         </p>
       </div>
       <div className="flex items-center gap-4">
