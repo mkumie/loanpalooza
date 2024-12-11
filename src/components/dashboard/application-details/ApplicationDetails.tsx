@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { FileText, User, MapPin, Briefcase } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useSession } from "@supabase/auth-helpers-react";
 
 interface ApplicationDetailsProps {
   application: LoanApplication;
@@ -21,24 +22,28 @@ export const ApplicationDetails = ({ application, isAdmin, onUpdate }: Applicati
   const showStatusControls = isAdmin && !application.is_draft;
   const prevStatusRef = useRef(application.status);
   const prevCommentsRef = useRef(application.admin_comments);
+  const session = useSession();
 
   useEffect(() => {
-    // Check if status has changed
-    if (prevStatusRef.current !== application.status) {
-      toast.info(`Application status updated to ${application.status}`, {
-        description: "The status of your loan application has been updated.",
-      });
-      prevStatusRef.current = application.status;
-    }
+    // Only show notifications to the applicant, not the admin
+    if (!isAdmin && session?.user?.id === application.user_id) {
+      // Check if status has changed
+      if (prevStatusRef.current !== application.status) {
+        toast.info(`Application status updated to ${application.status}`, {
+          description: "The status of your loan application has been updated.",
+        });
+        prevStatusRef.current = application.status;
+      }
 
-    // Check if admin comments have changed
-    if (prevCommentsRef.current !== application.admin_comments && application.admin_comments) {
-      toast.info("New admin feedback received", {
-        description: application.admin_comments,
-      });
-      prevCommentsRef.current = application.admin_comments;
+      // Check if admin comments have changed
+      if (prevCommentsRef.current !== application.admin_comments && application.admin_comments) {
+        toast.info("New admin feedback received", {
+          description: application.admin_comments,
+        });
+        prevCommentsRef.current = application.admin_comments;
+      }
     }
-  }, [application.status, application.admin_comments]);
+  }, [application.status, application.admin_comments, isAdmin, session?.user?.id, application.user_id]);
 
   return (
     <ScrollArea className="h-[600px] pr-4">
