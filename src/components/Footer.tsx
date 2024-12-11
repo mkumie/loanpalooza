@@ -93,10 +93,10 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar - Updated to be centered and stacked */}
         <div className="mt-8 pt-8 border-t border-gray-200">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-gray-600">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="text-sm text-gray-600 text-center">
               © {new Date().getFullYear()} YES Finance. All rights reserved.
             </div>
             <div className="flex items-center text-sm text-gray-600">
