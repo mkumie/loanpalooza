@@ -1,4 +1,4 @@
-export type LoanStatus = "pending" | "approved" | "rejected" | "draft";
+export type LoanStatus = "pending" | "approved" | "rejected" | "draft" | "reviewing";
 
 export interface LoanApplication {
   id: string;
