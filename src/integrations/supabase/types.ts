@@ -455,7 +455,7 @@ export type Database = {
     }
     Enums: {
       file_category: "policy" | "form" | "guide" | "other"
-      loan_status: "pending" | "approved" | "rejected" | "draft"
+      loan_status: "pending" | "approved" | "rejected" | "draft" | "reviewing"
     }
     CompositeTypes: {
       [_ in never]: never
