@@ -92,7 +92,7 @@ const Login = () => {
                 },
               }}
               theme="default"
-              providers={[]}
+              providers={["google", "facebook"]}
             />
           </CardContent>
         </Card>
