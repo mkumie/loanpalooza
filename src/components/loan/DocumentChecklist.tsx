@@ -1,12 +1,14 @@
-import { Check, AlertCircle } from "lucide-react";
+import { Check, AlertCircle, Copy } from "lucide-react";
 import { DocumentUploadStatus, RequiredDocument } from "@/types/documents";
+import { Button } from "@/components/ui/button";
 
 interface DocumentChecklistProps {
   documents: RequiredDocument[];
   documentStatus: DocumentUploadStatus[];
+  onCopyPrevious?: (documentType: string, previousFilePath: string) => void;
 }
 
-export const DocumentChecklist = ({ documents, documentStatus }: DocumentChecklistProps) => {
+export const DocumentChecklist = ({ documents, documentStatus, onCopyPrevious }: DocumentChecklistProps) => {
   return (
     <div className="space-y-4">
       {documents.map((doc) => {
@@ -41,6 +43,17 @@ export const DocumentChecklist = ({ documents, documentStatus }: DocumentCheckli
                 <p className="text-sm text-green-600 mt-1">
                   Uploaded: {status.fileName}
                 </p>
+              )}
+              {!status?.uploaded && status?.previousFileName && onCopyPrevious && status?.previousFilePath && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => onCopyPrevious(doc.type, status.previousFilePath!)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy from previous application
+                </Button>
               )}
             </div>
           </div>

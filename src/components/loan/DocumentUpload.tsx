@@ -18,6 +18,29 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
+  // Query to get the most recent application ID for prefilling documents
+  const { data: recentApplicationId } = useQuery({
+    queryKey: ["recentApplication"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from("loan_applications")
+        .select("id")
+        .eq("user_id", user.id)
+        .neq("status", "draft")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error || !data) return null;
+      return data.id;
+    },
+    enabled: !applicationId // Only run if we don't have a current application ID
+  });
+
+  // Query for current application documents
   const { data: uploadedDocuments, refetch: refetchDocuments } = useQuery({
     queryKey: ["loanDocuments", applicationId],
     queryFn: async () => {
@@ -36,12 +59,36 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
     enabled: Boolean(applicationId?.trim()),
   });
 
-  // Calculate document status
-  const documentStatus: DocumentUploadStatus[] = REQUIRED_DOCUMENTS.map((doc) => ({
-    type: doc.type,
-    uploaded: uploadedDocuments?.some((uploaded) => uploaded.document_type === doc.type) ?? false,
-    fileName: uploadedDocuments?.find((uploaded) => uploaded.document_type === doc.type)?.file_name,
-  }));
+  // Query for previous application documents
+  const { data: previousDocuments } = useQuery({
+    queryKey: ["previousDocuments", recentApplicationId],
+    queryFn: async () => {
+      if (!recentApplicationId) return [];
+
+      const { data, error } = await supabase
+        .from("loan_documents")
+        .select("*")
+        .eq("loan_application_id", recentApplicationId);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: Boolean(recentApplicationId),
+  });
+
+  // Calculate document status including previous documents info
+  const documentStatus: DocumentUploadStatus[] = REQUIRED_DOCUMENTS.map((doc) => {
+    const currentDoc = uploadedDocuments?.find((uploaded) => uploaded.document_type === doc.type);
+    const previousDoc = previousDocuments?.find((uploaded) => uploaded.document_type === doc.type);
+    
+    return {
+      type: doc.type,
+      uploaded: Boolean(currentDoc),
+      fileName: currentDoc?.file_name,
+      previousFileName: previousDoc?.file_name,
+      previousFilePath: previousDoc?.file_path,
+    };
+  });
 
   // Check if all required documents are uploaded
   const areRequiredDocumentsUploaded = REQUIRED_DOCUMENTS
@@ -112,10 +159,57 @@ export const DocumentUpload = ({ applicationId, onUploadComplete, onValidationCh
     }
   };
 
+  const handleCopyPrevious = async (documentType: DocumentType, previousFilePath: string) => {
+    if (!applicationId?.trim() || !previousFilePath) {
+      toast({
+        title: "Error",
+        description: "Invalid application or file information",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      // Download the previous file
+      const { data, error: downloadError } = await supabase.storage
+        .from("loan_documents")
+        .download(previousFilePath);
+
+      if (downloadError) throw downloadError;
+
+      // Create a new file object
+      const file = new File([data], previousFilePath.split("/").pop() || "document", {
+        type: "application/octet-stream",
+      });
+
+      // Upload to the new application
+      await handleUpload(file, documentType);
+
+      toast({
+        title: "Success",
+        description: "Document copied from previous application",
+      });
+    } catch (error: any) {
+      console.error("Copy error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to copy document from previous application",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 p-4 border rounded-lg bg-white">
       <h3 className="text-lg font-semibold">Required Documents</h3>
-      <DocumentChecklist documents={REQUIRED_DOCUMENTS} documentStatus={documentStatus} />
+      <DocumentChecklist 
+        documents={REQUIRED_DOCUMENTS} 
+        documentStatus={documentStatus}
+        onCopyPrevious={handleCopyPrevious}
+      />
       <DocumentUploadForm 
         documents={REQUIRED_DOCUMENTS}
         onUpload={handleUpload}

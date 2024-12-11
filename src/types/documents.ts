@@ -24,4 +24,6 @@ export interface DocumentUploadStatus {
   type: DocumentType;
   uploaded: boolean;
   fileName?: string;
+  previousFileName?: string;
+  previousFilePath?: string;
 }
