@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { DocumentType } from "@/types/documents";
+import { DocumentType, DocumentUploadStatus } from "@/types/documents";
 
 export const useDocumentUpload = (applicationId: string, onUploadComplete?: () => void) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -102,9 +102,43 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
     }
   };
 
+  const handleCopyAllPrevious = async (documentStatus: DocumentUploadStatus[]) => {
+    const documentsToProcess = documentStatus.filter(
+      doc => !doc.uploaded && doc.previousFilePath
+    );
+
+    if (documentsToProcess.length === 0) {
+      toast({
+        description: "No previous documents available to copy",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    let successCount = 0;
+
+    for (const doc of documentsToProcess) {
+      if (doc.previousFilePath) {
+        try {
+          await handleCopyPrevious(doc.type, doc.previousFilePath);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to copy document: ${doc.type}`, error);
+        }
+      }
+    }
+
+    setIsUploading(false);
+    toast({
+      title: "Documents Copied",
+      description: `Successfully copied ${successCount} document${successCount !== 1 ? 's' : ''}`,
+    });
+  };
+
   return {
     isUploading,
     handleUpload,
-    handleCopyPrevious
+    handleCopyPrevious,
+    handleCopyAllPrevious
   };
 };
