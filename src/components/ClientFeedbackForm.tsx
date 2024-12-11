@@ -12,11 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Database } from "@/integrations/supabase/types";
+
+type ReferralSource = Database["public"]["Enums"]["referral_source"];
 
 export const ClientFeedbackForm = ({ onClose }: { onClose?: () => void }) => {
   const session = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [referralSource, setReferralSource] = useState<string>("");
+  const [referralSource, setReferralSource] = useState<ReferralSource | "">("");
   const [otherSource, setOtherSource] = useState("");
   const [additionalComments, setAdditionalComments] = useState("");
 
@@ -31,7 +34,7 @@ export const ClientFeedbackForm = ({ onClose }: { onClose?: () => void }) => {
     try {
       const { error } = await supabase.from("client_feedback").insert({
         user_id: session?.user?.id,
-        referral_source: referralSource,
+        referral_source: referralSource as ReferralSource,
         other_source: referralSource === "other" ? otherSource : null,
         additional_comments: additionalComments,
       });
@@ -64,7 +67,7 @@ export const ClientFeedbackForm = ({ onClose }: { onClose?: () => void }) => {
           </label>
           <Select
             value={referralSource}
-            onValueChange={setReferralSource}
+            onValueChange={(value: ReferralSource) => setReferralSource(value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select an option" />
