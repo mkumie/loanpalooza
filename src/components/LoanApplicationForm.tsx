@@ -18,20 +18,20 @@ export const LoanApplicationForm = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        {showFeedback ? (
-          <Card>
+    <div className="min-h-screen bg-gray-50">
+      {showFeedback ? (
+        <div className="container mx-auto px-4 py-8">
+          <Card className="max-w-2xl mx-auto">
             <CardContent>
               <ClientFeedbackForm onClose={handleFeedbackClose} />
             </CardContent>
           </Card>
-        ) : (
-          <LoanApplicationProvider>
-            <LoanFormContent onSubmitSuccess={handleSubmitSuccess} />
-          </LoanApplicationProvider>
-        )}
-      </div>
+        </div>
+      ) : (
+        <LoanApplicationProvider>
+          <LoanFormContent onSubmitSuccess={handleSubmitSuccess} />
+        </LoanApplicationProvider>
+      )}
     </div>
   );
 };
