@@ -13,7 +13,7 @@ export const useFormSteps = () => {
   const draftId = searchParams.get('draft');
 
   const { validationErrors, validateStep, validateForm } = useFormValidation();
-  const { isSubmitting, setIsSubmitting, handleSubmit: submitApplication } = useFormSubmission(formData, setIsSubmitting);
+  const { isSubmitting, setIsSubmitting, handleSubmit: submitApplication } = useFormSubmission(formData);
   const { termsAgreed, setTermsAgreed, recordTermsAcceptance } = useTermsAcceptance(draftId);
 
   const handleSubmit = async (e: React.FormEvent) => {

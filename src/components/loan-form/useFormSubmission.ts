@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 import { LoanStatus } from "@/types/loan";
+import { useState } from "react";
 
 const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: string, isDraft: boolean = true) => {
   const status: LoanStatus = isDraft ? "draft" : "pending";
@@ -73,16 +74,15 @@ const recordTermsAcceptance = async (userId: string, applicationId: string) => {
   }
 };
 
-export const useFormSubmission = (formData: LoanApplicationData, setIsSubmitting: (value: boolean) => void) => {
+export const useFormSubmission = (formData: LoanApplicationData) => {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
     const user = (await supabase.auth.getUser()).data.user;
 
     if (!user) {
       toast.error("You must be logged in to submit an application");
-      setIsSubmitting(false);
       return null;
     }
 
@@ -108,10 +108,8 @@ export const useFormSubmission = (formData: LoanApplicationData, setIsSubmitting
       console.error("Error submitting application:", error);
       toast.error(error.message || "Failed to submit application");
       return null;
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  return handleSubmit;
+  return { isSubmitting, setIsSubmitting, handleSubmit };
 };
