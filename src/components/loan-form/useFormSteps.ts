@@ -10,10 +10,11 @@ export const useFormSteps = () => {
   const { formData, setFormData, currentStep, setCurrentStep } = useLoanApplication();
   const [searchParams] = useSearchParams();
   const [areDocumentsValid, setAreDocumentsValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const draftId = searchParams.get('draft');
 
   const { validationErrors, validateStep, validateForm } = useFormValidation();
-  const { isSubmitting, setIsSubmitting, handleSubmit: submitApplication } = useFormSubmission(formData);
+  const submitApplication = useFormSubmission(formData);
   const { termsAgreed, setTermsAgreed, recordTermsAcceptance } = useTermsAcceptance(draftId);
 
   const handleSubmit = async (e: React.FormEvent) => {
