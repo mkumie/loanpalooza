@@ -12,72 +12,94 @@ export const useDraftApplication = () => {
   const draftId = searchParams.get('draft');
   const session = useSession();
 
-  const { data: draftData } = useQuery({
-    queryKey: ['draft-application', draftId, session?.user?.id],
+  // Query to fetch either draft or most recent application
+  const { data: applicationData } = useQuery({
+    queryKey: ['application-data', draftId, session?.user?.id],
     queryFn: async () => {
-      if (!draftId || !session?.user) {
-        console.log("No draft ID or session, skipping fetch");
+      if (!session?.user) {
+        console.log("No session, skipping fetch");
         return null;
       }
 
-      console.log("Fetching draft application with ID:", draftId);
-      
-      const { data, error } = await supabase
-        .from('loan_applications')
-        .select('*')
-        .eq('id', draftId)
-        .eq('user_id', session.user.id)
-        .eq('status', 'draft')
-        .single();
+      if (draftId) {
+        console.log("Fetching draft application with ID:", draftId);
+        const { data, error } = await supabase
+          .from('loan_applications')
+          .select('*')
+          .eq('id', draftId)
+          .eq('user_id', session.user.id)
+          .eq('status', 'draft')
+          .single();
 
-      if (error) {
-        console.error('Error fetching draft:', error);
-        toast.error('Failed to load draft application');
-        return null;
+        if (error) {
+          console.error('Error fetching draft:', error);
+          toast.error('Failed to load draft application');
+          return null;
+        }
+
+        console.log("Draft data fetched successfully:", data);
+        return data;
+      } else {
+        // If no draft ID, fetch the most recent non-draft application
+        console.log("Fetching most recent application");
+        const { data, error } = await supabase
+          .from('loan_applications')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .neq('status', 'draft')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
+          console.error('Error fetching recent application:', error);
+          return null;
+        }
+
+        console.log("Recent application data fetched:", data);
+        return data;
       }
-
-      console.log("Draft data fetched successfully:", data);
-      return data;
     },
-    enabled: !!draftId && !!session?.user,
+    enabled: !!session?.user,
   });
 
   useEffect(() => {
-    if (draftData) {
+    if (applicationData) {
       setFormData({
-        firstName: draftData.first_name,
-        surname: draftData.surname,
-        dateOfBirth: draftData.date_of_birth,
-        gender: draftData.gender,
-        maritalStatus: draftData.marital_status,
-        district: draftData.district,
-        village: draftData.village,
-        homeProvince: draftData.home_province,
-        employmentStatus: draftData.employment_status,
-        employerName: draftData.employer_name || '',
-        occupation: draftData.occupation || '',
-        monthlyIncome: draftData.monthly_income?.toString() || '',
-        employmentLength: draftData.employment_length || '',
-        workAddress: draftData.work_address || '',
-        workPhone: draftData.work_phone || '',
-        loanAmount: draftData.loan_amount?.toString() || '',
-        loanPurpose: draftData.loan_purpose,
-        repaymentPeriod: draftData.repayment_period?.toString() || '',
-        existingLoans: draftData.existing_loans,
-        existingLoanDetails: draftData.existing_loan_details || '',
-        referenceFullName: draftData.reference_full_name,
-        referenceRelationship: draftData.reference_relationship,
-        referenceAddress: draftData.reference_address,
-        referencePhone: draftData.reference_phone,
-        referenceOccupation: draftData.reference_occupation,
-        bankName: draftData.bank_name,
-        accountNumber: draftData.account_number,
-        accountType: draftData.account_type,
-        branchName: draftData.branch_name,
-        accountHolderName: draftData.account_holder_name,
+        firstName: applicationData.first_name,
+        surname: applicationData.surname,
+        dateOfBirth: applicationData.date_of_birth,
+        gender: applicationData.gender,
+        maritalStatus: applicationData.marital_status,
+        district: applicationData.district,
+        village: applicationData.village,
+        homeProvince: applicationData.home_province,
+        employmentStatus: applicationData.employment_status,
+        employerName: applicationData.employer_name || '',
+        occupation: applicationData.occupation || '',
+        monthlyIncome: applicationData.monthly_income?.toString() || '',
+        employmentLength: applicationData.employment_length || '',
+        workAddress: applicationData.work_address || '',
+        workPhone: applicationData.work_phone || '',
+        // Don't prefill loan amount and purpose for new applications
+        loanAmount: draftId ? applicationData.loan_amount?.toString() || '' : '',
+        loanPurpose: draftId ? applicationData.loan_purpose : '',
+        repaymentPeriod: draftId ? applicationData.repayment_period?.toString() || '' : '',
+        existingLoans: applicationData.existing_loans,
+        existingLoanDetails: applicationData.existing_loan_details || '',
+        referenceFullName: applicationData.reference_full_name,
+        referenceRelationship: applicationData.reference_relationship,
+        referenceAddress: applicationData.reference_address,
+        referencePhone: applicationData.reference_phone,
+        referenceOccupation: applicationData.reference_occupation,
+        bankName: applicationData.bank_name,
+        accountNumber: applicationData.account_number,
+        accountType: applicationData.account_type,
+        branchName: applicationData.branch_name,
+        accountHolderName: applicationData.account_holder_name,
       });
     }
-  }, [draftData, setFormData]);
+  }, [applicationData, setFormData, draftId]);
 
   return { draftId };
 };
