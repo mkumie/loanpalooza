@@ -67,7 +67,7 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
     },
     enabled: !!session,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes (renamed from cacheTime)
   });
 
   const draftApplications = applications?.filter(app => app.status === 'draft') || [];
