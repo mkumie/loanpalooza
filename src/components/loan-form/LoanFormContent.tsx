@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
+import { LoanStatus } from "@/types/loan"; // Add this import
 
 interface LoanFormContentProps {
   onSubmitSuccess?: () => void;
