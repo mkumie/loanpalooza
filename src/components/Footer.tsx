@@ -47,17 +47,21 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold text-gray-900 mb-4">Contact Us</h3>
             <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm text-gray-600">
-                <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                <span>PO BOX 7820, BOROKO, NCD, PAPUA NEW GUINEA</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <Phone className="h-4 w-4 mt-1 flex-shrink-0" />
+                <div className="flex flex-col">
+                  <span>(675) 75100777</span>
+                  <span>(675) 7975 5100</span>
+                  <span>(675) 432 2777</span>
+                </div>
               </li>
               <li className="flex items-center gap-2 text-sm text-gray-600">
-                <Mail className="h-4 w-4" />
-                <span>support@yesfinance.com</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm text-gray-600">
-                <MapPin className="h-4 w-4" />
-                <span>123 Finance Street, NY 10001</span>
+                <Mail className="h-4 w-4 flex-shrink-0" />
+                <span>yesfinance20@gmail.com</span>
               </li>
             </ul>
           </div>
