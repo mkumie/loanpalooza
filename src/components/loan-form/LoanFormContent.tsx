@@ -4,6 +4,7 @@ import { FormNavigation } from "./FormNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { useFormSteps } from "./useFormSteps";
 import { Navigation } from "../Navigation";
+import { useDraftApplication } from "./hooks/useDraftApplication";
 
 interface LoanFormContentProps {
   onSubmitSuccess?: () => void;
@@ -24,12 +25,17 @@ export const LoanFormContent = ({ onSubmitSuccess }: LoanFormContentProps) => {
     handleSubmit,
   } = useFormSteps();
 
+  // Use the draft application hook to prefill form data
+  useDraftApplication();
+
   const onFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit(e);
     if (success && onSubmitSuccess) {
       onSubmitSuccess();
+      return true;
     }
+    return false;
   };
 
   return (
