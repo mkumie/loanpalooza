@@ -7,10 +7,11 @@ import { DocumentsSection } from "./DocumentsSection";
 import { StatusSection } from "./StatusSection";
 import { HeaderSection } from "./HeaderSection";
 import { Separator } from "@/components/ui/separator";
-import { FileText, User, MapPin, Briefcase } from "lucide-react";
+import { FileText, User, MapPin, Briefcase, MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useSession } from "@supabase/auth-helpers-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ApplicationDetailsProps {
   application: LoanApplication;
@@ -74,6 +75,21 @@ export const ApplicationDetails = ({ application, isAdmin, onUpdate }: Applicati
     <ScrollArea className="h-[600px] pr-4">
       <div className="space-y-6">
         <HeaderSection application={application} />
+
+        {/* Admin Comments Section - Visible to all users */}
+        {application.admin_comments && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Feedback from Admin</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">{application.admin_comments}</p>
+            </CardContent>
+          </Card>
+        )}
 
         <section>
           <div className="flex items-center gap-2 mb-4">
