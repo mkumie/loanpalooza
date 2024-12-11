@@ -10,7 +10,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { FileEdit, Trash2 } from "lucide-react";
+import { FileEdit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -32,19 +32,23 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
   const session = useSession();
   const navigate = useNavigate();
 
-  const { data: applications, refetch: refetchApplications } = useQuery({
-    queryKey: ["loan-applications", session?.user?.id],
+  const { data: applications, refetch: refetchApplications, isLoading } = useQuery({
+    queryKey: ["loan-applications", session?.user?.id, isAdmin],
     queryFn: async () => {
       if (!session?.user?.id) return [];
       
-      // For admin users, fetch all applications
+      // For admin users, fetch all applications with pagination
       if (isAdmin) {
         const { data, error } = await supabase
           .from("loan_applications")
           .select("*")
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(50); // Limit to 50 most recent applications for initial load
         
-        if (error) throw error;
+        if (error) {
+          toast.error("Failed to fetch applications");
+          throw error;
+        }
         return data as LoanApplication[];
       }
       
@@ -55,10 +59,15 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        toast.error("Failed to fetch applications");
+        throw error;
+      }
       return data as LoanApplication[];
     },
     enabled: !!session,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   const draftApplications = applications?.filter(app => app.status === 'draft') || [];
@@ -70,8 +79,6 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
         return;
       }
 
-      console.log("Attempting to delete draft:", draftId);
-      
       const { data: result, error: rpcError } = await supabase
         .rpc('delete_draft_application', {
           draft_id: draftId,
@@ -83,7 +90,6 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
         throw rpcError;
       }
 
-      console.log("Draft deletion result:", result);
       toast.success("Draft application deleted successfully");
       refetchApplications();
     } catch (error: any) {
@@ -91,6 +97,14 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
       toast.error(error.message || "Failed to delete draft application");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="mt-8">
@@ -162,6 +176,7 @@ export const DashboardContent = ({ isAdmin }: DashboardContentProps) => {
             applications={applications || []} 
             isAdmin={isAdmin}
             onUpdate={refetchApplications}
+            isLoading={isLoading}
           />
         </TabsContent>
 

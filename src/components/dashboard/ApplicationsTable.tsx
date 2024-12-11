@@ -5,15 +5,16 @@ import { SearchFilters } from "./SearchFilters";
 import { Pagination } from "./Pagination";
 import { ApplicationRow } from "./ApplicationRow";
 import { Card } from "@/components/ui/card";
-import { FileX } from "lucide-react";
+import { FileX, Loader2 } from "lucide-react";
 
 interface ApplicationsTableProps {
   applications: LoanApplication[];
   isAdmin?: boolean;
   onUpdate: () => void;
+  isLoading?: boolean;
 }
 
-export const ApplicationsTable = ({ applications, isAdmin, onUpdate }: ApplicationsTableProps) => {
+export const ApplicationsTable = ({ applications, isAdmin, onUpdate, isLoading }: ApplicationsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,6 +34,16 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate }: Applicati
   const totalPages = Math.ceil((filteredApplications?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedApplications = filteredApplications?.slice(startIndex, startIndex + itemsPerPage);
+
+  if (isLoading) {
+    return (
+      <Card className="p-8">
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="overflow-hidden">
