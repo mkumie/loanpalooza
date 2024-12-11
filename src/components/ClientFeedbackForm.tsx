@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSession } from "@supabase/auth-helpers-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,58 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useSession } from "@supabase/auth-helpers-react";
 
-export const LoanApplicationForm = () => {
-  const navigate = useNavigate();
-  const session = useSession();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [referralSource, setReferralSource] = useState<string>("");
-  const [otherSource, setOtherSource] = useState("");
-  const [additionalComments, setAdditionalComments] = useState("");
-  const [showFeedback, setShowFeedback] = useState(false);
-
-  const handleSubmitSuccess = () => {
-    setShowFeedback(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      // Assume we have a function to handle the loan application submission
-      await submitLoanApplication();
-      handleSubmitSuccess();
-    } catch (error) {
-      console.error("Error submitting loan application:", error);
-      toast.error("Failed to submit loan application. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (showFeedback) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <ClientFeedbackForm onClose={() => navigate("/dashboard")} />
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6">
-      {/* Loan application fields go here */}
-      <div className="flex justify-end gap-4">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Submit Application"}
-        </Button>
-      </div>
-    </form>
-  );
-};
-
-const ClientFeedbackForm = ({ onClose }: { onClose?: () => void }) => {
+export const ClientFeedbackForm = ({ onClose }: { onClose?: () => void }) => {
   const session = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [referralSource, setReferralSource] = useState<string>("");

@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      client_feedback: {
+        Row: {
+          additional_comments: string | null
+          created_at: string
+          id: string
+          other_source: string | null
+          referral_source: Database["public"]["Enums"]["referral_source"]
+          user_id: string | null
+        }
+        Insert: {
+          additional_comments?: string | null
+          created_at?: string
+          id?: string
+          other_source?: string | null
+          referral_source: Database["public"]["Enums"]["referral_source"]
+          user_id?: string | null
+        }
+        Update: {
+          additional_comments?: string | null
+          created_at?: string
+          id?: string
+          other_source?: string | null
+          referral_source?: Database["public"]["Enums"]["referral_source"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       downloadable_files: {
         Row: {
           category: Database["public"]["Enums"]["file_category"]
@@ -456,6 +483,13 @@ export type Database = {
     Enums: {
       file_category: "policy" | "form" | "guide" | "other"
       loan_status: "pending" | "approved" | "rejected" | "draft" | "reviewing"
+      referral_source:
+        | "friend_family"
+        | "social_media"
+        | "search_engine"
+        | "advertisement"
+        | "employer"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
