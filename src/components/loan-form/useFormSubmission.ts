@@ -3,14 +3,12 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 import { LoanStatus } from "@/types/loan";
-import { useState } from "react";
 
 const transformFormDataToDbFormat = (formData: LoanApplicationData, userId: string, isDraft: boolean = true) => {
   const status: LoanStatus = isDraft ? "draft" : "pending";
   
   return {
     user_id: userId,
-    is_draft: isDraft,
     status,
     first_name: formData.firstName,
     surname: formData.surname,
@@ -76,7 +74,6 @@ const recordTermsAcceptance = async (userId: string, applicationId: string) => {
 
 export const useFormSubmission = (formData: LoanApplicationData) => {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     const user = (await supabase.auth.getUser()).data.user;
@@ -111,5 +108,5 @@ export const useFormSubmission = (formData: LoanApplicationData) => {
     }
   };
 
-  return { isSubmitting, setIsSubmitting, handleSubmit };
+  return handleSubmit;
 };
