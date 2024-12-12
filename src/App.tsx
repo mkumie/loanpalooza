@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -57,28 +57,6 @@ const queryClient = new QueryClient({
 
 // App component as a proper function component
 const App: React.FC = () => {
-  // Force logout on initial load to clear any stale session
-  useEffect(() => {
-    const hasLoggedOut = localStorage.getItem('initial_logout_completed');
-    
-    if (!hasLoggedOut) {
-      const forceLogout = async () => {
-        try {
-          localStorage.clear();
-          sessionStorage.clear();
-          await supabase.auth.signOut();
-          // Set flag after successful logout
-          localStorage.setItem('initial_logout_completed', 'true');
-          window.location.href = '/login';
-        } catch (error) {
-          console.error("Error during forced logout:", error);
-        }
-      };
-
-      forceLogout();
-    }
-  }, []);
-
   return (
     <SessionContextProvider 
       supabaseClient={supabase}
