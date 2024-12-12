@@ -40,8 +40,7 @@ const Register = () => {
     try {
       setIsLoading(true);
       
-      // First, sign up the user
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -52,10 +51,17 @@ const Register = () => {
         },
       });
 
-      if (signUpError) throw signUpError;
-
-      // The profile will be automatically created by the database trigger
-      // with the metadata we provided during signup
+      if (error) {
+        if (error.message.includes("User already registered")) {
+          toast({
+            title: "Registration failed",
+            description: "This email is already registered. Please try logging in instead.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Registration successful!",
@@ -63,7 +69,7 @@ const Register = () => {
       });
       
       navigate("/login");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
       toast({
         title: "Error",
