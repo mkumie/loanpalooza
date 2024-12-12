@@ -116,8 +116,6 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
       // Update the previous form data after successful save
       setPreviousFormData(formData);
       
-      toast.success("Progress saved successfully");
-      
       if (!draftId && result.data?.id) {
         navigate(`/apply?draft=${result.data.id}`, { replace: true });
       }
@@ -149,6 +147,24 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     }
   };
 
+  const cleanupDraft = async () => {
+    if (!draftId) return true;
+    
+    try {
+      const { data: result, error: rpcError } = await supabase
+        .rpc('delete_draft_application', {
+          draft_id: draftId,
+          user_id_input: session?.user?.id
+        });
+
+      if (rpcError) throw rpcError;
+      return true;
+    } catch (error) {
+      console.error("Error cleaning up draft:", error);
+      return false;
+    }
+  };
+
   return (
     <div className="flex justify-between mt-8">
       {currentStep > 1 && (
@@ -167,6 +183,13 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           type="submit" 
           className="bg-primary hover:bg-primary-600"
           disabled={isSubmitting || isSubmitDisabled}
+          onClick={async (e) => {
+            e.preventDefault();
+            if (await cleanupDraft()) {
+              toast.success("Application submitted successfully!");
+              navigate("/dashboard");
+            }
+          }}
         >
           {isSubmitting ? "Submitting..." : "Submit Application"}
         </Button>
