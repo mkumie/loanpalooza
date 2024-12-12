@@ -35,8 +35,15 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
+      // Clear any local storage or session storage data
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Sign out from Supabase
       await supabase.auth.signOut();
-      navigate("/login");
+      
+      // Clear any query cache if needed
+      window.location.href = '/login';
     } catch (error) {
       console.error("Error during sign out:", error);
       navigate("/login");
