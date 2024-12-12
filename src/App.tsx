@@ -57,6 +57,22 @@ const queryClient = new QueryClient({
 
 // App component as a proper function component
 const App: React.FC = () => {
+  // Force logout on initial load to clear any stale session
+  useEffect(() => {
+    const forceLogout = async () => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        await supabase.auth.signOut();
+        window.location.href = '/login';
+      } catch (error) {
+        console.error("Error during forced logout:", error);
+      }
+    };
+
+    forceLogout();
+  }, []);
+
   return (
     <SessionContextProvider 
       supabaseClient={supabase}
