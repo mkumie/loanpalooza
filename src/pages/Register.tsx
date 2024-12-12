@@ -21,11 +21,7 @@ const registerSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z
     .string()
-    .min(6, "Password must be at least 6 characters long")
-    .regex(
-      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
-      "Password must contain at least one letter and one number"
-    ),
+    .min(6, "Password must be at least 6 characters long"),
   firstName: z.string().min(1, "First name is required"),
   surname: z.string().min(1, "Surname is required"),
 });
