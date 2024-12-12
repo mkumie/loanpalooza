@@ -15,6 +15,28 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!session?.user?.id) return null;
       
+      // First check if profile exists
+      const { data: profileExists, error: checkError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", session.user.id)
+        .single();
+
+      if (checkError || !profileExists) {
+        // Create profile if it doesn't exist
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert([{ 
+            id: session.user.id,
+            first_name: null,
+            surname: null
+          }]);
+
+        if (insertError) throw insertError;
+        return { first_name: null, surname: null };
+      }
+
+      // Fetch profile data
       const { data, error } = await supabase
         .from("profiles")
         .select("first_name, surname")
