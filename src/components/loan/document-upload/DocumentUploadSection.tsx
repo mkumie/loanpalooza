@@ -35,6 +35,15 @@ export const DocumentUploadSection = ({
     refetchDocuments();
   });
 
+  // Generate a unique filename with timestamp and random string
+  const generateUniqueFileName = (originalName: string) => {
+    const timestamp = new Date().getTime();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const extension = originalName.split('.').pop();
+    const baseName = originalName.split('.').slice(0, -1).join('.');
+    return `${baseName}_${timestamp}_${randomString}.${extension}`;
+  };
+
   // Calculate document status including previous documents info
   const documentStatus: DocumentUploadStatus[] = REQUIRED_DOCUMENTS.map((doc) => {
     const currentDoc = uploadedDocuments?.find((uploaded) => uploaded.document_type === doc.type);
@@ -103,7 +112,11 @@ export const DocumentUploadSection = ({
           
           <DocumentUploadForm 
             documents={REQUIRED_DOCUMENTS}
-            onUpload={handleUpload}
+            onUpload={async (file, documentType) => {
+              const uniqueFileName = generateUniqueFileName(file.name);
+              const newFile = new File([file], uniqueFileName, { type: file.type });
+              await handleUpload(newFile, documentType);
+            }}
             isUploading={isUploading}
           />
         </CardContent>
