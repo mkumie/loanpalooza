@@ -26,10 +26,13 @@ export const DashboardHeader = ({
     ? `${firstName} ${surname}`
     : firstName || userEmail;
 
-  // Query to check pending applications for the current user
+  // Query to check pending applications for the current user (skip for admins)
   const { data: pendingApplications } = useQuery({
-    queryKey: ["pending-applications"],
+    queryKey: ["pending-applications", isAdmin],
     queryFn: async () => {
+      // Skip the check for admin users
+      if (isAdmin) return [];
+
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return [];
 
@@ -46,11 +49,18 @@ export const DashboardHeader = ({
       }
       return data;
     },
+    enabled: !isAdmin, // Only run the query for non-admin users
   });
 
   const hasTwoPendingApplications = (pendingApplications?.length || 0) >= 2;
 
   const handleNewApplication = () => {
+    // Admin users can always create new applications
+    if (isAdmin) {
+      navigate("/apply");
+      return;
+    }
+
     if (hasTwoPendingApplications) {
       toast.error("You can only have 2 pending applications at a time");
       return;
@@ -72,7 +82,7 @@ export const DashboardHeader = ({
         <Button 
           onClick={handleNewApplication}
           className="shadow-sm"
-          disabled={hasTwoPendingApplications}
+          disabled={!isAdmin && hasTwoPendingApplications}
         >
           <Plus className="mr-2 h-4 w-4" />
           New Application
