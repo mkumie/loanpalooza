@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useApplicationSubmission } from "./hooks/useApplicationSubmission";
+import { LoanStatus } from "@/types/loan";
 
 interface FormNavigationProps {
   isSubmitDisabled?: boolean;
@@ -38,6 +39,28 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     return JSON.stringify(formData) !== JSON.stringify(previousFormData);
   };
 
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 1:
+        return formData.firstName && formData.surname && formData.dateOfBirth && 
+               formData.gender && formData.maritalStatus && formData.district && 
+               formData.village && formData.homeProvince;
+      case 2:
+        return formData.employmentStatus && formData.monthlyIncome;
+      case 3:
+        return formData.loanAmount && formData.loanPurpose && formData.repaymentPeriod;
+      case 4:
+        return formData.referenceFullName && formData.referenceRelationship && 
+               formData.referenceAddress && formData.referencePhone && 
+               formData.referenceOccupation;
+      case 5:
+        return formData.bankName && formData.accountNumber && formData.accountType && 
+               formData.branchName && formData.accountHolderName;
+      default:
+        return true;
+    }
+  };
+
   const handleSaveDraft = async () => {
     if (!session?.user) {
       toast.error("Please log in to save your application.");
@@ -53,7 +76,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     try {
       const transformedData = {
         user_id: session.user.id,
-        status: 'draft',
+        status: 'draft' as LoanStatus,
         first_name: formData.firstName,
         surname: formData.surname,
         date_of_birth: formData.dateOfBirth,
@@ -164,9 +187,9 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           type="button"
           onClick={handleSaveAndContinue}
           className="bg-primary hover:bg-primary-600"
-          disabled={isSubmitting || isSubmitDisabled || (!hasDataChanged())}
+          disabled={isSubmitting || !isStepValid()}
         >
-          {isSubmitting ? "Saving..." : hasDataChanged() ? "Save and Continue" : "Next"}
+          {isSubmitting ? "Saving..." : "Next"}
         </Button>
       )}
     </div>
