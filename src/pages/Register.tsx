@@ -14,13 +14,23 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface RegisterForm {
-  email: string;
-  password: string;
-  firstName: string;
-  surname: string;
-}
+const registerSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters long")
+    .regex(
+      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
+      "Password must contain at least one letter and one number"
+    ),
+  firstName: z.string().min(1, "First name is required"),
+  surname: z.string().min(1, "Surname is required"),
+});
+
+type RegisterForm = z.infer<typeof registerSchema>;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -28,6 +38,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
       password: "",
