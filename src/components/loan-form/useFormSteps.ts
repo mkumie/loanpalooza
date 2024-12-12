@@ -5,6 +5,7 @@ import { useFormValidation } from "./useFormValidation";
 import { useFormSubmission } from "./useFormSubmission";
 import { useTermsAcceptance } from "./useTermsAcceptance";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useFormSteps = () => {
   const { formData, setFormData, currentStep, setCurrentStep } = useLoanApplication();
@@ -16,6 +17,26 @@ export const useFormSteps = () => {
   const { validationErrors, validateStep, validateForm } = useFormValidation();
   const submitApplication = useFormSubmission(formData);
   const { termsAgreed, setTermsAgreed, recordTermsAcceptance } = useTermsAcceptance(draftId);
+
+  const cleanupDraft = async (draftId: string) => {
+    try {
+      const { data: result, error: rpcError } = await supabase
+        .rpc('delete_draft_application', {
+          draft_id: draftId,
+          user_id_input: (await supabase.auth.getSession()).data.session?.user.id
+        });
+
+      if (rpcError) {
+        console.error("Error cleaning up draft:", rpcError);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error in cleanupDraft:", error);
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent): Promise<boolean> => {
     e.preventDefault();
@@ -69,6 +90,15 @@ export const useFormSteps = () => {
       const applicationId = await submitApplication();
       if (applicationId) {
         console.log("Application submitted successfully:", applicationId);
+        
+        // If this was a draft, clean it up after successful submission
+        if (draftId) {
+          const cleanupSuccess = await cleanupDraft(draftId);
+          if (!cleanupSuccess) {
+            console.warn("Draft cleanup failed, but application was submitted successfully");
+          }
+        }
+        
         toast.success("Application submitted successfully!");
         return true;
       } else {
