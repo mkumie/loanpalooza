@@ -40,13 +40,14 @@ const Dashboard = () => {
       sessionStorage.clear();
       
       // Sign out from Supabase
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       
-      // Clear any query cache if needed
-      window.location.href = '/login';
+      // Use navigate instead of window.location
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Error during sign out:", error);
-      navigate("/login");
+      navigate("/login", { replace: true });
     }
   };
 
