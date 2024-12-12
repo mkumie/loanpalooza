@@ -74,6 +74,7 @@ export const DocumentsSection = ({ applicationId }: DocumentsSectionProps) => {
                 key={doc.id}
                 fileName={doc.file_name}
                 fileType={doc.file_type}
+                documentType={doc.document_type}
                 uploadedAt={doc.uploaded_at}
                 onView={() => handleView(doc.file_path, doc.file_name, doc.file_type)}
                 viewUrl={selectedDoc?.name === doc.file_name ? viewUrl : null}

@@ -3,11 +3,13 @@ import { Eye, FileIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { REQUIRED_DOCUMENTS } from "@/constants/documentRequirements";
 
 interface DocumentItemProps {
   fileName: string;
   fileType: string;
   uploadedAt: string;
+  documentType: string;
   onView: () => void;
   viewUrl: string | null;
 }
@@ -16,9 +18,14 @@ export const DocumentItem = ({
   fileName,
   fileType,
   uploadedAt,
+  documentType,
   onView,
   viewUrl,
 }: DocumentItemProps) => {
+  // Find the document requirement to get the label
+  const documentRequirement = REQUIRED_DOCUMENTS.find(doc => doc.type === documentType);
+  const displayLabel = documentRequirement?.label || documentType;
+
   return (
     <Card className="group hover:bg-muted/50 transition-colors">
       <CardContent className="p-4 flex items-center justify-between">
@@ -30,7 +37,10 @@ export const DocumentItem = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <p className="font-medium truncate">{fileName}</p>
+                  <div>
+                    <p className="font-medium truncate">{displayLabel}</p>
+                    <p className="text-sm text-muted-foreground truncate">{fileName}</p>
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{fileName}</p>
