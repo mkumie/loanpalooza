@@ -9,7 +9,6 @@ import { useDocumentUpload } from "./useDocumentUpload";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, Copy, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 interface DocumentUploadSectionProps {
   applicationId: string;
@@ -34,7 +33,6 @@ export const DocumentUploadSection = ({
     handleCopyAllPrevious 
   } = useDocumentUpload(applicationId, () => {
     refetchDocuments();
-    // We removed the toast from here since it will be handled in useDocumentUpload
   });
 
   // Calculate document status including previous documents info
@@ -59,7 +57,7 @@ export const DocumentUploadSection = ({
   // Check if there are any documents available to copy
   const hasPreviousDocuments = previousDocuments && previousDocuments.length > 0;
 
-  // Notify parent component about validation status
+  // Notify parent component about validation status immediately when documents status changes
   useEffect(() => {
     onValidationChange?.(areRequiredDocumentsUploaded);
   }, [areRequiredDocumentsUploaded, onValidationChange]);

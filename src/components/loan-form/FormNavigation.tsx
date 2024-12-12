@@ -40,22 +40,27 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
   };
 
   const isStepValid = () => {
+    // For prefilled data, consider them valid
     switch (currentStep) {
       case 1:
-        return formData.firstName && formData.surname && formData.dateOfBirth && 
+        return Boolean(formData.firstName && formData.surname && formData.dateOfBirth && 
                formData.gender && formData.maritalStatus && formData.district && 
-               formData.village && formData.homeProvince;
+               formData.village && formData.homeProvince);
       case 2:
-        return formData.employmentStatus && formData.monthlyIncome;
+        return Boolean(formData.employmentStatus && formData.monthlyIncome);
       case 3:
-        return formData.loanAmount && formData.loanPurpose && formData.repaymentPeriod;
+        return Boolean(formData.loanAmount && formData.loanPurpose && formData.repaymentPeriod);
       case 4:
-        return formData.referenceFullName && formData.referenceRelationship && 
+        return Boolean(formData.referenceFullName && formData.referenceRelationship && 
                formData.referenceAddress && formData.referencePhone && 
-               formData.referenceOccupation;
+               formData.referenceOccupation);
       case 5:
-        return formData.bankName && formData.accountNumber && formData.accountType && 
-               formData.branchName && formData.accountHolderName;
+        return Boolean(formData.bankName && formData.accountNumber && formData.accountType && 
+               formData.branchName && formData.accountHolderName);
+      case 6:
+        return !isSubmitDisabled; // This is controlled by DocumentUploadSection
+      case 7:
+        return true; // Terms page has its own validation
       default:
         return true;
     }
@@ -147,6 +152,11 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
   };
 
   const handleSaveAndContinue = async () => {
+    if (!isStepValid()) {
+      toast.error("Please fill in all required fields before proceeding");
+      return;
+    }
+
     const savedId = await handleSaveDraft();
     
     if (currentStep === 5) {
