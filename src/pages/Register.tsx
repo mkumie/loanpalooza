@@ -61,10 +61,11 @@ const Register = () => {
       if (error) {
         if (error.message.includes("User already registered")) {
           toast({
-            title: "Registration failed",
-            description: "This email is already registered. Please try logging in instead.",
+            title: "Account already exists",
+            description: "This email is already registered. Please log in instead.",
             variant: "destructive",
           });
+          navigate("/login");
           return;
         }
         throw error;
