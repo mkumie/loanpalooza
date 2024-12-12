@@ -19,11 +19,39 @@ const Login = () => {
       navigate("/dashboard");
     }
 
-    // Listen for auth state changes and handle errors
+    // Listen for auth state changes and handle social login data
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event) => {
-      if (event === 'SIGNED_OUT') {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Extract user metadata from social login
+        const { user } = session;
+        const metadata = user.user_metadata;
+
+        // Update profile with social login data if available
+        if (metadata) {
+          const { data: existingProfile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          if (!profileError && existingProfile && !existingProfile.first_name) {
+            // Only update if profile exists but fields are empty
+            await supabase
+              .from('profiles')
+              .update({
+                first_name: metadata.full_name?.split(' ')[0] || metadata.first_name,
+                surname: metadata.full_name?.split(' ').slice(1).join(' ') || metadata.last_name,
+                gender: metadata.gender,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', user.id);
+          }
+        }
+        
+        navigate("/dashboard");
+      } else if (event === 'SIGNED_OUT') {
         setAuthError(null);
       }
     });
