@@ -59,18 +59,24 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   // Force logout on initial load to clear any stale session
   useEffect(() => {
-    const forceLogout = async () => {
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-      } catch (error) {
-        console.error("Error during forced logout:", error);
-      }
-    };
+    const hasLoggedOut = localStorage.getItem('initial_logout_completed');
+    
+    if (!hasLoggedOut) {
+      const forceLogout = async () => {
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+          await supabase.auth.signOut();
+          // Set flag after successful logout
+          localStorage.setItem('initial_logout_completed', 'true');
+          window.location.href = '/login';
+        } catch (error) {
+          console.error("Error during forced logout:", error);
+        }
+      };
 
-    forceLogout();
+      forceLogout();
+    }
   }, []);
 
   return (
