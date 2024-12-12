@@ -1,19 +1,14 @@
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentType, DocumentUploadStatus } from "@/types/documents";
+import { toast } from "sonner";
 
 export const useDocumentUpload = (applicationId: string, onUploadComplete?: () => void) => {
   const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
 
   const handleUpload = async (file: File, documentType: DocumentType) => {
     if (!applicationId?.trim()) {
-      toast({
-        title: "Error",
-        description: "Invalid application ID",
-        variant: "destructive",
-      });
+      toast.error("Invalid application ID");
       return;
     }
 
@@ -44,19 +39,11 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
         throw uploadError;
       }
 
-      toast({
-        title: "Success",
-        description: "Document uploaded successfully",
-      });
-
+      toast.success("Document uploaded successfully");
       if (onUploadComplete) onUploadComplete();
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload document",
-        variant: "destructive",
-      });
+      toast.error("Failed to upload document");
     } finally {
       setIsUploading(false);
     }
@@ -64,11 +51,7 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
 
   const handleCopyPrevious = async (documentType: DocumentType, previousFilePath: string) => {
     if (!applicationId?.trim() || !previousFilePath) {
-      toast({
-        title: "Error",
-        description: "Invalid application or file information",
-        variant: "destructive",
-      });
+      toast.error("Invalid application or file information");
       return;
     }
 
@@ -85,18 +68,9 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
       });
 
       await handleUpload(file, documentType);
-
-      toast({
-        title: "Success",
-        description: "Document copied from previous application",
-      });
     } catch (error: any) {
       console.error("Copy error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to copy document from previous application",
-        variant: "destructive",
-      });
+      toast.error("Failed to copy document from previous application");
     } finally {
       setIsUploading(false);
     }
@@ -108,9 +82,7 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
     );
 
     if (documentsToProcess.length === 0) {
-      toast({
-        description: "No previous documents available to copy",
-      });
+      toast.info("No previous documents available to copy");
       return;
     }
 
@@ -129,10 +101,9 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
     }
 
     setIsUploading(false);
-    toast({
-      title: "Documents Copied",
-      description: `Successfully copied ${successCount} document${successCount !== 1 ? 's' : ''}`,
-    });
+    if (successCount > 0) {
+      toast.success(`Successfully copied ${successCount} document${successCount !== 1 ? 's' : ''}`);
+    }
   };
 
   return {

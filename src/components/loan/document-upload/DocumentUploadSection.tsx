@@ -34,7 +34,7 @@ export const DocumentUploadSection = ({
     handleCopyAllPrevious 
   } = useDocumentUpload(applicationId, () => {
     refetchDocuments();
-    toast.success("Documents updated successfully");
+    // We removed the toast from here since it will be handled in useDocumentUpload
   });
 
   // Calculate document status including previous documents info
