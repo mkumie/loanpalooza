@@ -50,6 +50,7 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
   };
 
   const handleCopyPrevious = async (documentType: DocumentType, previousFilePath: string) => {
+    // Validate inputs before setting loading state
     if (!applicationId?.trim() || !previousFilePath) {
       toast.error("Invalid application or file information");
       return;
@@ -67,7 +68,34 @@ export const useDocumentUpload = (applicationId: string, onUploadComplete?: () =
         type: "application/octet-stream",
       });
 
-      await handleUpload(file, documentType);
+      // Instead of calling handleUpload directly, we'll do the upload here
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${applicationId}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: dbError } = await supabase.from("loan_documents").insert({
+        loan_application_id: applicationId,
+        file_name: file.name,
+        file_path: filePath,
+        file_type: file.type,
+        document_type: documentType,
+      });
+
+      if (dbError) throw dbError;
+
+      const { error: uploadError } = await supabase.storage
+        .from("loan_documents")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        await supabase
+          .from("loan_documents")
+          .delete()
+          .eq("file_path", filePath);
+        throw uploadError;
+      }
+
+      toast.success("Document copied successfully");
+      if (onUploadComplete) onUploadComplete();
     } catch (error: any) {
       console.error("Copy error:", error);
       toast.error("Failed to copy document from previous application");
