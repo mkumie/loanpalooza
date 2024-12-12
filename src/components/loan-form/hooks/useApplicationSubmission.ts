@@ -51,6 +51,25 @@ export const useApplicationSubmission = (draftId: string | null) => {
     }
   };
 
+  const updateApplicationStatus = async () => {
+    if (!draftId || !session?.user?.id) return false;
+
+    try {
+      // Update the application status to pending instead of deleting it
+      const { error } = await supabase
+        .from("loan_applications")
+        .update({ status: 'pending' })
+        .eq('id', draftId)
+        .eq('user_id', session.user.id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error updating application status:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
@@ -62,11 +81,13 @@ export const useApplicationSubmission = (draftId: string | null) => {
         return false;
       }
 
-      // Clean up draft
-      const cleanupSuccess = await cleanupDraft();
-      if (!cleanupSuccess) {
-        toast.error("Failed to process application");
-        return false;
+      // If this is a draft, update its status instead of cleaning it up
+      if (draftId) {
+        const updateSuccess = await updateApplicationStatus();
+        if (!updateSuccess) {
+          toast.error("Failed to submit application");
+          return false;
+        }
       }
 
       toast.success("Application submitted successfully!");
