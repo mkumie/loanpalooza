@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSession } from "@supabase/auth-helpers-react";
-import { LoanApplicationData } from "@/contexts/LoanApplicationContext";
 
 export const useApplicationSubmission = (draftId: string | null) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +70,8 @@ export const useApplicationSubmission = (draftId: string | null) => {
       }
 
       toast.success("Application submitted successfully!");
-      navigate("/dashboard?showFeedback=true");
+      // Navigate to feedback form after successful submission
+      navigate("/apply?showFeedback=true");
       return true;
     } catch (error) {
       console.error("Error during submission:", error);
