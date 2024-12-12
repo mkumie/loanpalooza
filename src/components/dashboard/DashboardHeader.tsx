@@ -26,14 +26,18 @@ export const DashboardHeader = ({
     ? `${firstName} ${surname}`
     : firstName || userEmail;
 
-  // Query to check pending applications
+  // Query to check pending applications for the current user
   const { data: pendingApplications } = useQuery({
     queryKey: ["pending-applications"],
     queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return [];
+
       const { data, error } = await supabase
         .from("loan_applications")
         .select("id")
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .eq("user_id", userData.user.id);
       
       if (error) {
         console.error("Error fetching pending applications:", error);
