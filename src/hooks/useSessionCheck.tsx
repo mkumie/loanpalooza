@@ -18,6 +18,17 @@ export const useSessionCheck = () => {
       }
 
       try {
+        // Check if the user still exists in auth
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error("User not found:", userError);
+          await supabase.auth.signOut();
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return;
+        }
+
         setUserEmail(session.user.email);
 
         // First check if profile exists
@@ -28,30 +39,33 @@ export const useSessionCheck = () => {
           .single();
 
         if (checkError || !profileExists) {
-          // Create profile if it doesn't exist
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert([{ 
-              id: session.user.id,
-              is_admin: false // Default to non-admin
-            }]);
-
-          if (insertError) throw insertError;
-          setIsAdmin(false);
-        } else {
-          // Fetch admin status if profile exists
-          const { data: profile, error } = await supabase
-            .from("profiles")
-            .select("is_admin")
-            .eq("id", session.user.id)
-            .single();
-
-          if (error) throw error;
-          setIsAdmin(profile?.is_admin || false);
+          // If profile doesn't exist, sign out the user
+          await supabase.auth.signOut();
+          toast.error("User profile not found. Please login again.");
+          navigate("/login");
+          return;
         }
+
+        // Fetch admin status if profile exists
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", session.user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching profile:", error);
+          await supabase.auth.signOut();
+          toast.error("Error loading profile. Please login again.");
+          navigate("/login");
+          return;
+        }
+
+        setIsAdmin(profile?.is_admin || false);
       } catch (error) {
-        console.error("Error fetching profile:", error);
-        toast.error("Error loading profile");
+        console.error("Error in session check:", error);
+        await supabase.auth.signOut();
+        toast.error("Session error. Please login again.");
         navigate("/login");
       }
     };

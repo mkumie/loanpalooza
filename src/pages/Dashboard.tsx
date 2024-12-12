@@ -5,6 +5,7 @@ import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { Navigation } from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -15,35 +16,18 @@ const Dashboard = () => {
     queryFn: async () => {
       if (!session?.user?.id) return null;
       
-      // First check if profile exists
-      const { data: profileExists, error: checkError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", session.user.id)
-        .single();
-
-      if (checkError || !profileExists) {
-        // Create profile if it doesn't exist
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert([{ 
-            id: session.user.id,
-            first_name: null,
-            surname: null
-          }]);
-
-        if (insertError) throw insertError;
-        return { first_name: null, surname: null };
-      }
-
-      // Fetch profile data
       const { data, error } = await supabase
         .from("profiles")
         .select("first_name, surname")
         .eq("id", session.user.id)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        toast.error("Error loading profile data");
+        return null;
+      }
+      
       return data;
     },
     enabled: !!session?.user?.id,
@@ -51,11 +35,6 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      if (!session) {
-        navigate("/login");
-        return;
-      }
-
       await supabase.auth.signOut();
       navigate("/login");
     } catch (error) {
