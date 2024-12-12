@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ClientFeedbackForm } from "./ClientFeedbackForm";
 import { LoanFormContent } from "./loan-form/LoanFormContent";
 import { LoanApplicationProvider } from "@/contexts/LoanApplicationContext";
@@ -7,11 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export const LoanApplicationForm = () => {
   const navigate = useNavigate();
-  const [showFeedback, setShowFeedback] = useState(false);
-
-  const handleSubmitSuccess = () => {
-    setShowFeedback(true);
-  };
+  const [searchParams] = useSearchParams();
+  const showFeedback = searchParams.get('showFeedback') === 'true';
 
   const handleFeedbackClose = () => {
     navigate("/dashboard");
@@ -29,7 +26,7 @@ export const LoanApplicationForm = () => {
         </div>
       ) : (
         <LoanApplicationProvider>
-          <LoanFormContent onSubmitSuccess={handleSubmitSuccess} />
+          <LoanFormContent />
         </LoanApplicationProvider>
       )}
     </div>

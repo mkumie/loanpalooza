@@ -5,21 +5,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { LoanStatus } from "@/types/loan";
-import { validateCurrentStep } from "@/utils/loanFormValidation";
+import { useApplicationSubmission } from "./hooks/useApplicationSubmission";
 
 interface FormNavigationProps {
   isSubmitDisabled?: boolean;
 }
 
 export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
-  const { currentStep, setCurrentStep, isSubmitting, formData } = useLoanApplication();
+  const { currentStep, setCurrentStep, formData } = useLoanApplication();
   const session = useSession();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draft');
   const [previousFormData, setPreviousFormData] = React.useState(formData);
   const [isInitialized, setIsInitialized] = React.useState(false);
+  const { isSubmitting, handleSubmit } = useApplicationSubmission(draftId);
 
   // Update previousFormData when formData is loaded from draft
   React.useEffect(() => {
@@ -30,20 +30,12 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
   }, [draftId, formData, isInitialized]);
 
   const hasDataChanged = () => {
-    // For personal details step, exclude pre-filled fields from change detection
     if (currentStep === 1) {
       const { firstName, surname, dateOfBirth, gender, ...currentStepData } = formData;
       const { firstName: prevFirstName, surname: prevSurname, dateOfBirth: prevDateOfBirth, gender: prevGender, ...previousStepData } = previousFormData;
-      
       return JSON.stringify(currentStepData) !== JSON.stringify(previousStepData);
     }
-    
     return JSON.stringify(formData) !== JSON.stringify(previousFormData);
-  };
-
-  const isCurrentStepValid = () => {
-    const errors = validateCurrentStep(currentStep, formData);
-    return Object.keys(errors).length === 0;
   };
 
   const handleSaveDraft = async () => {
@@ -61,7 +53,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     try {
       const transformedData = {
         user_id: session.user.id,
-        status: 'draft' as LoanStatus,
+        status: 'draft',
         first_name: formData.firstName,
         surname: formData.surname,
         date_of_birth: formData.dateOfBirth,
@@ -113,7 +105,6 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
 
       if (result.error) throw result.error;
 
-      // Update the previous form data after successful save
       setPreviousFormData(formData);
       
       if (!draftId && result.data?.id) {
@@ -136,7 +127,6 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
     const savedId = await handleSaveDraft();
     
     if (currentStep === 5) {
-      // For bank details step, ensure we have an application ID before proceeding
       if (!draftId && !savedId) {
         toast.error("Unable to proceed - application ID not found");
         return;
@@ -144,24 +134,6 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
       setCurrentStep(6);
     } else if (currentStep < 7) {
       setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const cleanupDraft = async () => {
-    if (!draftId) return true;
-    
-    try {
-      const { data: result, error: rpcError } = await supabase
-        .rpc('delete_draft_application', {
-          draft_id: draftId,
-          user_id_input: session?.user?.id
-        });
-
-      if (rpcError) throw rpcError;
-      return true;
-    } catch (error) {
-      console.error("Error cleaning up draft:", error);
-      return false;
     }
   };
 
@@ -183,13 +155,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           type="submit" 
           className="bg-primary hover:bg-primary-600"
           disabled={isSubmitting || isSubmitDisabled}
-          onClick={async (e) => {
-            e.preventDefault();
-            if (await cleanupDraft()) {
-              toast.success("Application submitted successfully!");
-              navigate("/dashboard");
-            }
-          }}
+          onClick={handleSubmit}
         >
           {isSubmitting ? "Submitting..." : "Submit Application"}
         </Button>
@@ -198,7 +164,7 @@ export const FormNavigation = ({ isSubmitDisabled }: FormNavigationProps) => {
           type="button"
           onClick={handleSaveAndContinue}
           className="bg-primary hover:bg-primary-600"
-          disabled={isSubmitting || isSubmitDisabled || (!hasDataChanged() && !isCurrentStepValid())}
+          disabled={isSubmitting || isSubmitDisabled || (!hasDataChanged())}
         >
           {isSubmitting ? "Saving..." : hasDataChanged() ? "Save and Continue" : "Next"}
         </Button>
