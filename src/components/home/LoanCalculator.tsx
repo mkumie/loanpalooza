@@ -4,16 +4,35 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const LoanCalculator = () => {
   const [loanAmount, setLoanAmount] = useState<string>("");
   const [fortnights, setFortnights] = useState<string>("");
   const [fortnightlyPayment, setFortnightlyPayment] = useState<number | null>(null);
 
+  const { data: currentRate } = useQuery({
+    queryKey: ["current-interest-rate"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("interest_rates")
+        .select("rate_percentage")
+        .eq("is_active", true)
+        .order("effective_from", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      return data.rate_percentage;
+    },
+  });
+
   const calculateFortnightlyPayment = () => {
     const principal = parseFloat(loanAmount);
     const totalFortnights = parseInt(fortnights);
-    const fortnightlyInterestRate = 0.15 / 26; // 15% annual interest rate divided by 26 fortnights
+    const annualRate = currentRate || 15; // Default to 15% if no rate is set
+    const fortnightlyInterestRate = annualRate / 100 / 26; // Convert annual rate to fortnightly
 
     if (principal && totalFortnights) {
       const payment =
@@ -74,7 +93,7 @@ export const LoanCalculator = () => {
               K {fortnightlyPayment.toFixed(2)}
             </p>
             <p className="text-xs text-gray-500 mt-2">
-              *Based on 15% annual interest rate
+              *Based on {currentRate || 15}% annual interest rate
             </p>
             <p className="text-xs text-gray-500">
               Total {fortnights} fortnightly payments

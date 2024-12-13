@@ -4,6 +4,7 @@ import { ApplicationsTable } from "../ApplicationsTable";
 import { FileManagement } from "../FileManagement";
 import { DownloadableFiles } from "@/components/home/DownloadableFiles";
 import { LoanApplication } from "@/types/loan";
+import { InterestRateManagement } from "@/components/admin/interest-rates/InterestRateManagement";
 
 interface DashboardTabsProps {
   isAdmin: boolean;
@@ -23,6 +24,7 @@ export const DashboardTabs = ({
       <TabsList>
         <TabsTrigger value="applications">Applications</TabsTrigger>
         {isAdmin && <TabsTrigger value="files">File Management</TabsTrigger>}
+        {isAdmin && <TabsTrigger value="interest-rates">Interest Rates</TabsTrigger>}
         <TabsTrigger value="resources">Resources</TabsTrigger>
       </TabsList>
 
@@ -39,6 +41,12 @@ export const DashboardTabs = ({
       {isAdmin && (
         <TabsContent value="files">
           <FileManagement />
+        </TabsContent>
+      )}
+
+      {isAdmin && (
+        <TabsContent value="interest-rates">
+          <InterestRateManagement />
         </TabsContent>
       )}
 
