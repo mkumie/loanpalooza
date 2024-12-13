@@ -425,6 +425,107 @@ export type Database = {
         }
         Relationships: []
       }
+      repayment_schedules: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          loan_application_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          loan_application_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          loan_application_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repayment_schedules_loan_application_id_fkey"
+            columns: ["loan_application_id"]
+            isOneToOne: false
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repayments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          loan_application_id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          receipt_url: string | null
+          reference_number: string | null
+          repayment_schedule_id: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          loan_application_id: string
+          notes?: string | null
+          payment_date?: string
+          payment_method: string
+          receipt_url?: string | null
+          reference_number?: string | null
+          repayment_schedule_id?: string | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          loan_application_id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          receipt_url?: string | null
+          reference_number?: string | null
+          repayment_schedule_id?: string | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repayments_loan_application_id_fkey"
+            columns: ["loan_application_id"]
+            isOneToOne: false
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repayments_repayment_schedule_id_fkey"
+            columns: ["repayment_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "repayment_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       terms_acceptances: {
         Row: {
           accepted_at: string | null
