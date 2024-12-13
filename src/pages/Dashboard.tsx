@@ -41,13 +41,18 @@ const Dashboard = () => {
       
       // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (error) {
+        toast.error("Error signing out");
+        throw error;
+      }
       
-      // Use navigate instead of window.location
-      navigate("/login", { replace: true });
+      toast.success("Successfully signed out");
+      // Navigate to home page with replace to prevent back navigation
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Error during sign out:", error);
-      navigate("/login", { replace: true });
+      // If there's an error, still try to navigate to home
+      navigate("/", { replace: true });
     }
   };
 

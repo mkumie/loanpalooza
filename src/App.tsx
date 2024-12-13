@@ -28,12 +28,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Session check error:", error);
         toast.error("Session expired. Please login again.");
-        window.location.href = '/login';
+        window.location.href = '/';
       }
       
       if (!currentSession) {
         toast.error("Please login to continue");
-        window.location.href = '/login';
+        window.location.href = '/';
       }
     };
 
@@ -41,7 +41,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   if (!session) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -100,7 +100,7 @@ const App: React.FC = () => {
                     </ProtectedRoute>
                   }
                 />
-                <Route path="*" element={<Navigate to="/login" replace />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <Footer />
             </BrowserRouter>
