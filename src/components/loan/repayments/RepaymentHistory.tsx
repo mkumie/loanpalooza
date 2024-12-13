@@ -33,6 +33,17 @@ export const RepaymentHistory = ({ loanId }: RepaymentHistoryProps) => {
     );
   }
 
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return "secondary";
+      case "failed":
+        return "destructive";
+      default:
+        return "default";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Payment History</h3>
@@ -52,15 +63,7 @@ export const RepaymentHistory = ({ loanId }: RepaymentHistoryProps) => {
                 <p className="font-medium">K {repayment.amount.toFixed(2)}</p>
                 <p className="text-sm text-gray-500">{repayment.payment_method}</p>
               </div>
-              <Badge
-                variant={
-                  repayment.status === "confirmed"
-                    ? "success"
-                    : repayment.status === "failed"
-                    ? "destructive"
-                    : "default"
-                }
-              >
+              <Badge variant={getStatusVariant(repayment.status)}>
                 {repayment.status}
               </Badge>
             </div>

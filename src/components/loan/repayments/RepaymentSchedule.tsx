@@ -33,6 +33,17 @@ export const RepaymentSchedule = ({ loanId }: RepaymentScheduleProps) => {
     );
   }
 
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "secondary";
+      case "overdue":
+        return "destructive";
+      default:
+        return "default";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Repayment Schedule</h3>
@@ -50,15 +61,7 @@ export const RepaymentSchedule = ({ loanId }: RepaymentScheduleProps) => {
                 <p className="text-sm text-gray-500">Amount</p>
                 <p className="font-medium">K {schedule.amount.toFixed(2)}</p>
               </div>
-              <Badge
-                variant={
-                  schedule.status === "paid"
-                    ? "success"
-                    : schedule.status === "overdue"
-                    ? "destructive"
-                    : "default"
-                }
-              >
+              <Badge variant={getStatusVariant(schedule.status)}>
                 {schedule.status}
               </Badge>
             </div>

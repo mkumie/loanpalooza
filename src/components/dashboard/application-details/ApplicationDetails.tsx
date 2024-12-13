@@ -29,12 +29,11 @@ export const ApplicationDetails = ({
       )}
       <DocumentsSection
         applicationId={application.id}
-        status={application.status}
       />
       {isAdmin && (
         <StatusSection
-          applicationId={application.id}
-          currentStatus={application.status}
+          application={application}
+          isAdmin={isAdmin}
           onUpdate={onUpdate}
         />
       )}
