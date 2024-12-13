@@ -23,6 +23,11 @@ export const ApplicationDetails = ({
     <ScrollArea className="h-[80vh] pr-4">
       <div className="space-y-6">
         <HeaderSection application={application} />
+        <StatusSection
+          application={application}
+          isAdmin={isAdmin}
+          onUpdate={onUpdate}
+        />
         <PersonalInfoSection application={application} />
         <LocationSection application={application} />
         <EmploymentSection application={application} />
@@ -32,13 +37,6 @@ export const ApplicationDetails = ({
         <DocumentsSection
           applicationId={application.id}
         />
-        {isAdmin && (
-          <StatusSection
-            application={application}
-            isAdmin={isAdmin}
-            onUpdate={onUpdate}
-          />
-        )}
       </div>
     </ScrollArea>
   );

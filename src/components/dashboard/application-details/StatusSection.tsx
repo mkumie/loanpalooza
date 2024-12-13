@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusUpdateControls } from "@/components/loan/StatusUpdateControls";
 import { LoanApplication } from "@/types/loan";
+import { StatusBadge } from "./StatusBadge";
 
 interface StatusSectionProps {
   application: LoanApplication;
@@ -16,17 +17,19 @@ export const StatusSection = ({ application, isAdmin, onUpdate }: StatusSectionP
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Current Status</p>
-            <p className="text-sm font-medium">{application.status}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-muted-foreground">Current Status:</p>
+            <StatusBadge status={application.status} />
           </div>
 
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Admin Comments</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Admin Comments</p>
             {application.admin_comments ? (
-              <p className="text-sm">{application.admin_comments}</p>
+              <div className="bg-muted p-3 rounded-md">
+                <p className="text-sm whitespace-pre-wrap">{application.admin_comments}</p>
+              </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No admin comments yet.</p>
+              <p className="text-sm text-muted-foreground italic">No admin comments yet.</p>
             )}
           </div>
 
