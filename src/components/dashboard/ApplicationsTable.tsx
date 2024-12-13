@@ -6,6 +6,8 @@ import { Pagination } from "./Pagination";
 import { ApplicationRow } from "./ApplicationRow";
 import { Card } from "@/components/ui/card";
 import { FileX, Loader2 } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { isWithinInterval, parseISO } from "date-fns";
 
 interface ApplicationsTableProps {
   applications: LoanApplication[];
@@ -17,23 +19,79 @@ interface ApplicationsTableProps {
 export const ApplicationsTable = ({ applications, isAdmin, onUpdate, isLoading }: ApplicationsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange>();
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const itemsPerPage = 10;
 
-  // Filter applications based on search term and status
+  // Filter applications based on search term, status, and date range
   const filteredApplications = applications?.filter((app) => {
     const matchesSearch =
       app.loan_purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `K ${app.loan_amount}`.includes(searchTerm);
+      `K ${app.loan_amount}`.includes(searchTerm) ||
+      (app.reference_number?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || app.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // Date range filter
+    let matchesDateRange = true;
+    if (dateRange?.from && dateRange?.to) {
+      const applicationDate = parseISO(app.created_at);
+      matchesDateRange = isWithinInterval(applicationDate, {
+        start: dateRange.from,
+        end: dateRange.to,
+      });
+    }
+
+    return matchesSearch && matchesStatus && matchesDateRange;
   });
 
   // Calculate pagination
   const totalPages = Math.ceil((filteredApplications?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedApplications = filteredApplications?.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleDownloadCSV = () => {
+    // Prepare CSV data
+    const headers = [
+      "Reference Number",
+      "Date",
+      "First Name",
+      "Surname",
+      "Loan Amount",
+      "Purpose",
+      "Status",
+      "Admin Comments"
+    ];
+
+    const csvData = filteredApplications.map((app) => [
+      app.reference_number || "",
+      new Date(app.created_at).toLocaleDateString(),
+      app.first_name,
+      app.surname,
+      app.loan_amount,
+      app.loan_purpose,
+      app.status,
+      app.admin_comments || ""
+    ]);
+
+    // Convert to CSV string
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map(row => row.map(cell => 
+        typeof cell === "string" ? `"${cell.replace(/"/g, '""')}"` : cell
+      ).join(","))
+    ].join("\n");
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `loan_applications_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (isLoading) {
     return (
@@ -53,6 +111,10 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate, isLoading }
           onSearchChange={setSearchTerm}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
+          isAdmin={isAdmin}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          onDownloadCSV={handleDownloadCSV}
         />
 
         <div className="rounded-md border">
@@ -83,7 +145,7 @@ export const ApplicationsTable = ({ applications, isAdmin, onUpdate, isLoading }
                     <div className="flex flex-col items-center justify-center text-muted-foreground">
                       <FileX className="h-10 w-10 mb-2" />
                       <p>No applications found</p>
-                      {searchTerm || statusFilter !== "all" ? (
+                      {(searchTerm || statusFilter !== "all" || dateRange) ? (
                         <p className="text-sm">Try adjusting your filters</p>
                       ) : null}
                     </div>
