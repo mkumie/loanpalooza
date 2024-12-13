@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { routes } from "@/config/routes";
 import { Footer } from "@/components/Footer";
@@ -20,7 +20,6 @@ const App = () => {
                 element={route.element}
               />
             ))}
-            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Footer />
         </BrowserRouter>

@@ -1,7 +1,7 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Navigation } from "@/components/Navigation";
@@ -11,15 +11,17 @@ import { AlertCircle } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const session = useSession();
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     if (session) {
-      navigate("/dashboard");
+      // Get the redirect path from location state, default to dashboard
+      const from = (location.state as any)?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
     }
 
-    // Listen for auth state changes and handle social login data
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -37,7 +39,6 @@ const Login = () => {
             .single();
 
           if (!profileError && existingProfile && !existingProfile.first_name) {
-            // Only update if profile exists but fields are empty
             await supabase
               .from('profiles')
               .update({
@@ -50,7 +51,9 @@ const Login = () => {
           }
         }
         
-        navigate("/dashboard");
+        // Get the redirect path from location state, default to dashboard
+        const from = (location.state as any)?.from?.pathname || "/dashboard";
+        navigate(from, { replace: true });
       } else if (event === 'SIGNED_OUT') {
         setAuthError(null);
       }
@@ -68,7 +71,7 @@ const Login = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [session, navigate]);
+  }, [session, navigate, location]);
 
   return (
     <div className="min-h-screen bg-background">
